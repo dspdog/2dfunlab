@@ -1,3 +1,5 @@
+import node.NodeWorld;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -285,6 +287,7 @@ public class ifsys extends Panel
         setSampleImg("meerkat.jpg");
         started = true;
 
+        NodeWorld.buildWorld();
     }
 
     public void update(Graphics gr){
@@ -299,10 +302,12 @@ public class ifsys extends Panel
             framesThisSecond =0;
         }
 
-        generatePixels();
-
-        rg.drawImage(createImage(new MemoryImageSource(screenwidth, screenheight, pixels, 0, screenwidth)), 0, 0, screenwidth, screenheight, this);
-        rg.drawImage(sampleImage, getWidth() - 50, 0, 50, 50, this);
+        //generatePixels();
+        //rg.drawImage(createImage(new MemoryImageSource(screenwidth, screenheight, pixels, 0, screenwidth)), 0, 0, screenwidth, screenheight, this);
+        //rg.drawImage(sampleImage, getWidth() - 50, 0, 50, 50, this);
+        rg.setColor(Color.black);
+        rg.fillRect(0, 0, screenwidth, screenheight);
+        NodeWorld.drawNodes(rg);
 
         if(!infoHidden && pointselected>=0){
             rg.setColor(Color.white);
@@ -440,7 +445,13 @@ public class ifsys extends Panel
     }
 
     public void gamefunc(){
-        samplesNeeded = Math.pow(shape.pointsInUse, iterations);
+        NodeWorld.update();
+
+
+    }
+
+    public void fractalFunction(){
+         /*samplesNeeded = Math.pow(shape.pointsInUse, iterations);
 
         if(shape.pointsInUse != 0){
 
@@ -518,7 +529,7 @@ public class ifsys extends Panel
                 if(!centerHidden || ctrlDown || shiftDown)
                     drawPtDot(-1);
             }
-        }
+        }*/
     }
 
     public void drawPtDot(int pointIndex){
