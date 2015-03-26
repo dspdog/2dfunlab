@@ -15,12 +15,12 @@ public class NodeWorld {
     private final static MyTree myTree = new MyTree(new Rectangle(0,0,1024,1024), maxNodeSize);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
-    public static int totalNodes = 100000;
+    public static int totalNodes = 10000;
 
     public static void buildWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
         for(int i=0; i<totalNodes; i++){
-            tempNodes.add(new Node(Math.random()*512 + 256, Math.random()*512 + 256, maxNodeSize));
+            tempNodes.add(new Node(Math.random()*512 + 256, Math.random()*512 + 256, maxNodeSize, myTree));
         }
         nodes = new CopyOnWriteArrayList<Node>(tempNodes);
     }

@@ -1,7 +1,5 @@
 package mytree;
 
-import node.Node;
-
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -9,15 +7,15 @@ import java.util.ArrayList;
  * Created by user on 3/25/2015.
  */
 public class MyTree<E extends Rectangle> { //a grid not a tree
-    int width;
-    int height;
+    int widthInCells;
+    int heightInCells;
     double maxNodeSize;
 
-    Rectangle bounds;
-    ArrayList<E>[][] nodes;// = new ArrayList[width][height];
+    Rectangle treeBounds;
+    ArrayList<E>[][] cells; //TODO make this 1D
 
     public MyTree(Rectangle _bounds, double maxSize){
-        bounds = _bounds;
+        treeBounds = _bounds;
         maxNodeSize = Math.max(maxSize, 8); //minimum grid size 8 pixels to avoid slowdowns
         init();
     }
@@ -25,29 +23,56 @@ public class MyTree<E extends Rectangle> { //a grid not a tree
     public void insert(E node){ //uses upper left corner as anchor?
         double x = node.getX();
         double y = node.getY();
-        if(bounds.contains(x,y)){
-            int quantizedX = (int)(width*(x-bounds.getMinX())/bounds.width);
-            int quantizedY = (int)(height*(y-bounds.getMinY())/bounds.height);
-            nodes[quantizedX][quantizedY].add(node);
+        if(treeBounds.contains(x,y)){
+            int quantizedX = (int)(widthInCells *(x- treeBounds.getMinX())/ treeBounds.width);
+            int quantizedY = (int)(heightInCells *(y- treeBounds.getMinY())/ treeBounds.height);
+            cells[quantizedX][quantizedY].add(node);
+        }
+    }
+
+    public int quantizedX(double x){
+        return Math.max(Math.min((int)(widthInCells *(x- treeBounds.getMinX())/ treeBounds.width), widthInCells-1),0);
+    }
+
+    public int quantizedY(double y){
+        return Math.max(Math.min((int)(heightInCells *(y- treeBounds.getMinY())/ treeBounds.height), heightInCells-1),0);
+    }
+
+    public ArrayList<E> cellAt(double x, double y){return cells[quantizedX(x)][quantizedY(y)];}
+
+    public ArrayList<E> nodesNear(E nodeBounds){ //TODO make list of cell indices
+
+        if(quantizedX(nodeBounds.getMinX()) == quantizedX(nodeBounds.getMaxX()) && quantizedY(nodeBounds.getMinY()) == quantizedY(nodeBounds.getMaxY())){ //all within one cell
+            return cellAt(nodeBounds.getMaxX(), nodeBounds.getMaxY());
+        }else{
+            ArrayList<E> cell0 = cellAt(nodeBounds.getMaxX(), nodeBounds.getMaxY());
+            ArrayList<E> cell1 = cellAt(nodeBounds.getMaxX(),nodeBounds.getMinY());
+            ArrayList<E> cell2 = cellAt(nodeBounds.getMinX(), nodeBounds.getMinY());
+            ArrayList<E> cell3 = cellAt(nodeBounds.getMinX(),nodeBounds.getMaxY());
+            if(cell1!=cell0){cell0.addAll(cell1);}
+            if(cell2!=cell0){cell0.addAll(cell2);}
+            if(cell3!=cell0){cell0.addAll(cell3);}
+
+            return cell0;
         }
     }
 
     public void init(){
-        width = (int)(bounds.getWidth()/maxNodeSize);
-        height = (int)(bounds.getHeight()/maxNodeSize);
+        widthInCells = (int)(treeBounds.getWidth()/maxNodeSize);
+        heightInCells = (int)(treeBounds.getHeight()/maxNodeSize);
 
-        nodes = new ArrayList[width][height];
-        for(int x=0; x<width; x++){
-            for(int y=0; y<height; y++){
-                nodes[x][y]=new ArrayList<E>();
+        cells = new ArrayList[widthInCells][heightInCells];
+        for(int x=0; x< widthInCells; x++){
+            for(int y=0; y< heightInCells; y++){
+                cells[x][y]=new ArrayList<E>();
             }
         }
     }
 
     public void clear(){
-        for(int x=0; x<width; x++){
-            for(int y=0; y<height; y++){
-                nodes[x][y].clear();
+        for(int x=0; x< widthInCells; x++){
+            for(int y=0; y< heightInCells; y++){
+                cells[x][y].clear();
             }
         }
     }
