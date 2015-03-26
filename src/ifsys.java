@@ -39,9 +39,7 @@ public class ifsys extends Panel
     Image sampleImage;
 
     //user params
-        boolean framesHidden;
-        boolean centerHidden;
-        boolean leavesHidden;
+
         boolean antiAliasing;
         boolean trailsHidden;
         boolean spokesHidden;
@@ -97,11 +95,6 @@ public class ifsys extends Panel
         game = new mainthread();
         quit = false;
         antiAliasing = true;
-        framesHidden = true;
-        centerHidden = false;
-        spokesHidden = true;
-        trailsHidden = true;
-        leavesHidden = true;
         infoHidden = false;
         imgSamples = true;
         guidesHidden = false;
@@ -184,19 +177,6 @@ public class ifsys extends Panel
             }
             if(e.getItem()=="Invert"){
                 invertColors = e.getStateChange()==1;
-            }
-        //GUIDES MENU
-            if(e.getItem()=="Info Box"){
-                infoHidden = e.getStateChange()==2;
-            }
-            if(e.getItem()=="Scale Markers"){
-                guidesHidden = e.getStateChange()==2;
-            }
-            if(e.getItem()=="Center"){
-                centerHidden = e.getStateChange()==2;
-            }
-            if(e.getItem()=="Point Markers"){
-                ptsHidden = e.getStateChange()==2;
             }
     }
 
@@ -697,30 +677,14 @@ public class ifsys extends Panel
             iterations--;
         //if(e.getKeyChar() == 'a')
         //    antiAliasing = !antiAliasing;
-        if(e.getKeyChar() == 'l')
-            leavesHidden = !leavesHidden;
+
         if(e.getKeyChar() == 's')
             spokesHidden = !spokesHidden;
-        //if(e.getKeyChar() == 'c')
-        //    centerHidden = !centerHidden;
-        if(e.getKeyChar() == 'f')
-            framesHidden = !framesHidden;
-        if(e.getKeyChar() == 'q')
-            imgSamples = !imgSamples;
-        if(e.getKeyChar() == 't')
-            trailsHidden = !trailsHidden;
-        //if(e.getKeyChar() == 'i')
-        //    infoHidden = !infoHidden;
-        //if(e.getKeyChar() == 'g')
-        //    guidesHidden = !guidesHidden;
         if(e.getKeyChar() == 'b'){
             shape.autoScale = !shape.autoScale;
             shape.updateCenter();
         }
-        //if(e.getKeyChar() == 'p')
-        //    ptsHidden = !ptsHidden;
-        //if(e.getKeyChar() == 'v')
-        //    invertColors = !invertColors;
+
         if(e.getKeyChar() == 'm')
             sampletotal += 100;
         if(e.getKeyChar() == 'n' && sampletotal > 1)

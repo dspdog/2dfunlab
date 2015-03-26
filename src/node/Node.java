@@ -17,10 +17,7 @@ public class Node {
         return new Rectangle((int) (pos.x - size / 2), (int) (pos.y - size /2),(int)size,(int)size);
     }
 
-    public Node(double x, double y, double _size){
-        this.setPos(x, y).setSize(_size);
-    }
-
+    public Node(double x, double y, double _size){this.setPos(x, y).setSize(_size);}
     public Node setPos(double x, double y){pos.set(x,y); return this;}
     public Node setSize(double s){size=s; return this;}
 
