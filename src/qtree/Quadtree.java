@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Quadtree<E extends Rectangle> {
 
     private int MAX_OBJECTS = 10;
-    private int MAX_LEVELS = 5;
+    private int MAX_LEVELS = 16;
 
     private int level;
     private ArrayList<E> objects;

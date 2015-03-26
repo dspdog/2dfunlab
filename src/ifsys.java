@@ -1,10 +1,9 @@
 import node.NodeWorld;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.MemoryImageSource;
+import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.net.URL;
 
@@ -12,10 +11,11 @@ public class ifsys extends Panel
     implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, ActionListener,
         ItemListener
 {
-    mainthread game;
+    final mainthread game;
     boolean quit;
-    int screenwidth;
-    int screenheight;
+    final int screenwidth;
+    final int screenheight;
+    final Font screenFont = new Font(Font.MONOSPACED, Font.BOLD, 12);
 
     int samplePixels[];
     int sampleWidth;
@@ -25,10 +25,12 @@ public class ifsys extends Panel
     double dataMax = 0;
     double gamma = 0;
     int pixels[];
-    Image render;
-    Graphics rg;
-    long fps;
-    long framesThisSecond;
+    BufferedImage render;
+    Graphics2D rg;
+    long fpsDraw;
+    long fpsLogic;
+    long framesThisSecondDrawn;
+    long framesThisSecondLogic;
     long oneSecondAgo;
 
     long samplesThisFrame;
@@ -87,7 +89,8 @@ public class ifsys extends Panel
         started=false;
         samplesThisFrame=0;
         oneSecondAgo =0;
-        framesThisSecond = 0;
+        framesThisSecondDrawn = 0;
+        framesThisSecondLogic = 0;
         altDown=false;
         ctrlDown=false;
         shiftDown=false;
@@ -141,11 +144,8 @@ public class ifsys extends Panel
         Menu fileMenu, renderMenu, shapeMenu, guidesMenu, viewMenu;
 
         menuBar = new MenuBar();
-        fileMenu = new Menu("File");
         renderMenu = new Menu("Render");
-        shapeMenu = new Menu("Shape");
-        guidesMenu = new Menu("Guides");
-        viewMenu = new Menu("View");
+
 
         //RENDER MENU
             CheckboxMenuItem aaButton = new CheckboxMenuItem("Anti-Aliasing"); //anti-aliasing toggle
@@ -158,68 +158,12 @@ public class ifsys extends Panel
             inButton.addItemListener(is);
             renderMenu.add(inButton);
 
-        //SHAPE MENU
-            CheckboxMenuItem autoScaleButton = new CheckboxMenuItem("AutoScale Points"); //autoscale toggle
-            autoScaleButton.setState(is.shape.autoScale);
-            autoScaleButton.addItemListener(is);
-            shapeMenu.add(autoScaleButton);
-
-            CheckboxMenuItem imgButton = new CheckboxMenuItem("Img Samples"); //img samples toggle
-            imgButton.setState(is.imgSamples);
-            imgButton.addItemListener(is);
-            shapeMenu.add(imgButton);
-
-            CheckboxMenuItem leavesButton = new CheckboxMenuItem("Leaves"); //leaves toggle
-            leavesButton.setState(!is.leavesHidden);
-            leavesButton.addItemListener(is);
-            shapeMenu.add(leavesButton);
-
-            CheckboxMenuItem spokesButton = new CheckboxMenuItem("Spokes"); //spokes toggle
-            spokesButton.setState(!is.spokesHidden);
-            spokesButton.addItemListener(is);
-            shapeMenu.add(spokesButton);
-
-            CheckboxMenuItem framesButton = new CheckboxMenuItem("Frames"); //frames toggle
-            framesButton.setState(!is.framesHidden);
-            framesButton.addItemListener(is);
-            shapeMenu.add(framesButton);
-
-            CheckboxMenuItem trailsButton = new CheckboxMenuItem("Point Trails"); //trails toggle
-            trailsButton.setState(!is.trailsHidden);
-            trailsButton.addItemListener(is);
-            shapeMenu.add(trailsButton);
-
-        //GUIDES MENU
-            CheckboxMenuItem infoButton = new CheckboxMenuItem("Info Box"); //info box toggle
-            infoButton.setState(!is.infoHidden);
-            infoButton.addItemListener(is);
-            guidesMenu.add(infoButton);
-
-            CheckboxMenuItem guidesButton = new CheckboxMenuItem("Scale Markers"); //scale markers toggle
-            guidesButton.setState(!is.guidesHidden);
-            guidesButton.addItemListener(is);
-            guidesMenu.add(guidesButton);
-
-            CheckboxMenuItem centerButton = new CheckboxMenuItem("Center"); //center view toggle
-            centerButton.setState(!is.centerHidden);
-            centerButton.addItemListener(is);
-            guidesMenu.add(centerButton);
-
-            CheckboxMenuItem ptButton = new CheckboxMenuItem("Point Markers"); //center view toggle
-            ptButton.setState(!is.ptsHidden);
-            ptButton.addItemListener(is);
-            guidesMenu.add(ptButton);
-
-        menuBar.add(fileMenu);
         menuBar.add(renderMenu);
-        menuBar.add(shapeMenu);
-        menuBar.add(guidesMenu);
-        menuBar.add(viewMenu);
-
         f.setMenuBar(menuBar);
     }
 
     public void init() {
+        System.setProperty("sun.java2d.opengl","True");
         start();
     }
 
@@ -260,7 +204,8 @@ public class ifsys extends Panel
         public void run(){
             while(!quit) 
                 try{
-                    gamefunc();
+                    framesThisSecondLogic++;
+                    NodeWorld.update();
                     repaint();
                     sleep(1L);
                 }
@@ -279,27 +224,28 @@ public class ifsys extends Panel
         addMouseMotionListener(this);
         addMouseWheelListener(this);
         addKeyListener(this);
-        render = createImage(screenwidth, screenheight);
-        rg = render.getGraphics();
+        render =  new BufferedImage(screenwidth, screenheight, BufferedImage.TYPE_INT_RGB); //createImage(screenwidth, screenheight);
+        rg = (Graphics2D)render.getGraphics();
         clearframe();
         game.start();
         shape.setToPreset(1);
         setSampleImg("meerkat.jpg");
         started = true;
-
         NodeWorld.buildWorld();
     }
 
     public void update(Graphics gr){
-        paint(gr);
+        paint((Graphics2D)gr);
     }
 
-    public void paint(Graphics gr){
-        framesThisSecond++;
+    public void paint(Graphics2D gr){
+        framesThisSecondDrawn++;
         if(System.currentTimeMillis()- oneSecondAgo >=1000){
             oneSecondAgo = System.currentTimeMillis();
-            fps= framesThisSecond;
-            framesThisSecond =0;
+            fpsDraw = framesThisSecondDrawn;
+            fpsLogic = framesThisSecondLogic;
+            framesThisSecondDrawn =0;
+            framesThisSecondLogic =0;
         }
 
         //generatePixels();
@@ -311,7 +257,10 @@ public class ifsys extends Panel
 
         if(!infoHidden && pointselected>=0){
             rg.setColor(Color.white);
-            rg.drawString("FPS " + String.valueOf(fps), 5, 15);
+
+            rg.setFont(screenFont);
+            rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, 15);
+            rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, 30);
         }
 
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
@@ -442,12 +391,6 @@ public class ifsys extends Panel
                 if(startedInScreen)break;
             };
         }
-    }
-
-    public void gamefunc(){
-        NodeWorld.update();
-
-
     }
 
     public void fractalFunction(){
@@ -596,11 +539,11 @@ public class ifsys extends Panel
             if(mousemode == 1){ //add point w/ double click
                 shape.addPoint(mousex, mousey);
                 clearframe();
-                gamefunc();
+
             }else if(mousemode == 3){ //remove point w/ double right click
                 shape.deletePoint(pointselected);
                 clearframe();
-                gamefunc();
+
             }
         }else{
             startDragX = e.getX();
@@ -687,7 +630,7 @@ public class ifsys extends Panel
 
         shape.updateCenter();
         clearframe();
-        gamefunc();
+
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
@@ -717,7 +660,7 @@ public class ifsys extends Panel
         }
 
         clearframe();
-        gamefunc();
+
     }
 
     public void mouseMoved(MouseEvent e){
@@ -738,7 +681,7 @@ public class ifsys extends Panel
             shiftDown=true;
         shape.updateCenter();
         clearframe();
-        gamefunc();
+
     }
 
     public void keyReleased(KeyEvent e){
