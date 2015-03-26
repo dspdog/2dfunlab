@@ -182,16 +182,11 @@ public class ifsys extends Panel
 
     public class mainthread extends Thread{
         public void run(){
-            while(!quit) 
-                try{
-                    framesThisSecondLogic++;
-                    NodeWorld.update();
-                    repaint();
-                    sleep(1L);
-                }
-                catch(InterruptedException e) {
-                    e.printStackTrace();
-                }
+            while(!quit){
+                framesThisSecondLogic++;
+                NodeWorld.update();
+                repaint();
+            }
         }
 
         public mainthread(){
