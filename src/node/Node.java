@@ -4,18 +4,20 @@ import com.sun.javafx.geom.Vec2d;
 import mytree.MyTree;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by user on 3/24/2015.
  */
-public class Node {
-    Vec2d pos = new Vec2d();
+public class Node{
+    public Vec2d pos = new Vec2d();
     double size;
-    final Rectangle2D.Double myShape = new Rectangle2D.Double();
+    final Ellipse2D.Double myShape = new Ellipse2D.Double();
     MyTree tree;
-    ArrayList<Node> nodesNearby;
+    ArrayList<Node> nodesNearby = new ArrayList<Node>();
+    ArrayList<Node> neighbors = new ArrayList<Node>();
 
     public Rectangle getBounds(){
         return new Rectangle((int) (pos.x - size / 2), (int) (pos.y - size /2),(int)size,(int)size);
@@ -26,15 +28,24 @@ public class Node {
     public Node setSize(double s){size=s; return this;}
     public Node setTree(MyTree t){tree=t; return this;}
 
-    public Node update(){
+    public void updatePos(){
         setPos(pos.x+Math.random()-0.5, pos.y+Math.random()-0.5);
-        nodesNearby = tree.nodesNear(getBounds()); //TODO get list of gridCells not individual nodes?
+    }
+
+    public Node updateNeighbors(){
+        neighbors.clear();
+        for(Node node : tree.nodesNear(this.getBounds())){
+            if(node.pos.distance(this.pos)<size && node!=this){
+                neighbors.add(node);
+            }
+        }
         return this;
     }
 
     public void draw(Graphics2D g){
         g.setColor(Color.GRAY);
         myShape.setFrame(getBounds());
-        g.fill(myShape);
+        //g.drawString("" + neighbors.size(), (float) pos.x, (float) pos.y);
+        g.draw(myShape);
     }
 }

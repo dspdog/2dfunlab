@@ -56,8 +56,8 @@ public class ifsys extends Panel
         boolean shiftDown;
         boolean ctrlDown;
         boolean altDown;
-        int mousex;
-        int mousey;
+        static int mousex;
+        static int mousey;
         int mouseScroll;
 
     ifsShape shape;
@@ -184,8 +184,13 @@ public class ifsys extends Panel
         public void run(){
             while(!quit){
                 framesThisSecondLogic++;
-                NodeWorld.update();
+                NodeWorld.update(mousex,mousey);
                 repaint();
+                /*try {
+                    Thread.sleep(1L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
             }
         }
 
@@ -194,7 +199,7 @@ public class ifsys extends Panel
     }
 
     public void start(){
-        setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        //setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
@@ -545,16 +550,16 @@ public class ifsys extends Panel
     }
 
     public void mouseReleased(MouseEvent e){
-        setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        //setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         mousemode = 0;
     }
 
     public void mouseEntered(MouseEvent e){
-        setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        //setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
     }
 
     public void mouseExited(MouseEvent e){
-        setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        //setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
     }
 
     public void mouseDragged(MouseEvent e){
