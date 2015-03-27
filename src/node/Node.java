@@ -13,6 +13,7 @@ import java.util.HashSet;
  */
 public class Node{
     public Vec2d pos = new Vec2d();
+    public Vec2d force = new Vec2d();
     double size;
     final Ellipse2D.Double myShape = new Ellipse2D.Double();
     MyTree tree;
@@ -32,14 +33,13 @@ public class Node{
         setPos(pos.x+Math.random()-0.5, pos.y+Math.random()-0.5);
     }
 
-    public Node updateNeighbors(){
+    public void updateNeighbors(){
         neighbors.clear();
         for(Node node : tree.nodesNear(this.getBounds())){
             if(node.pos.distance(this.pos)<size && node!=this){
                 neighbors.add(node);
             }
         }
-        return this;
     }
 
     public void draw(Graphics2D g){
