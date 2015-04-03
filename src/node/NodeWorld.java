@@ -10,11 +10,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by user on 3/24/2015.
  */
 public class NodeWorld {
-    private final static double maxNodeSize = 2;
-    private final static MyTree myTree = new MyTree(new Rectangle(0,0,1024,1024), maxNodeSize);
+    private final static double maxNodeSize = 32; //diameter
+    public final static Rectangle myBounds = new Rectangle(0,0,1024,800);
+    private final static MyTree myTree = new MyTree(myBounds, maxNodeSize);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
-    public static int totalNodes = 200;
+    public static int totalNodes = 2000;
 
     public static void buildWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
@@ -29,7 +30,7 @@ public class NodeWorld {
         for(Node node : nodes){
             total+=node.neighbors.size();
         }
-        System.out.println("AV NEIGHBS " + total/nodes.size());
+        //System.out.println("AV NEIGHBS " + total/nodes.diameter());
     }
 
     public static void drawNodes(Graphics2D g){
@@ -51,7 +52,7 @@ public class NodeWorld {
             node.updateNeighbors();
         }
 
-        getAverageNeighbors();
+        //getAverageNeighbors();
 
         if(nodes.size()>0){
             nodes.get(0).setPos(x-20,y-20);

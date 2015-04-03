@@ -6,7 +6,6 @@ import mytree.MyTree;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Created by user on 3/24/2015.
@@ -14,29 +13,33 @@ import java.util.HashSet;
 public class Node{
     public Vec2d pos = new Vec2d();
     public Vec2d force = new Vec2d();
-    double size;
+    double diameter; //diameter
     final Ellipse2D.Double myShape = new Ellipse2D.Double();
     MyTree tree;
-    ArrayList<Node> nodesNearby = new ArrayList<Node>();
+   // ArrayList<Node> nodesNearby = new ArrayList<Node>();
     ArrayList<Node> neighbors = new ArrayList<Node>();
 
     public Rectangle getBounds(){
-        return new Rectangle((int) (pos.x - size / 2), (int) (pos.y - size /2),(int)size,(int)size);
+        return new Rectangle((int) (pos.x - diameter / 2), (int) (pos.y - diameter /2),(int) diameter,(int) diameter);
     }
 
-    public Node(double x, double y, double s, MyTree t){this.setPos(x, y).setSize(s).setTree(t);}
+    public Node(double x, double y, double s, MyTree t){this.setPos(x, y).setDiameter(s).setTree(t);}
     public Node setPos(double x, double y){pos.set(x,y); return this;}
-    public Node setSize(double s){size=s; return this;}
+    public Node setDiameter(double s){
+        diameter =s; return this;}
     public Node setTree(MyTree t){tree=t; return this;}
 
     public void updatePos(){
-        setPos(pos.x+Math.random()-0.5, pos.y+Math.random()-0.5);
+        NodeBehaviors.moveBrownian(this, 0.1f); //corresponds to "temperature"?
+        NodeBehaviors.moveToMaintainNeighborDensity(this, 0.1550f);
+        //NodeBehaviors.pullGravity(this);
+        NodeBehaviors.restrictToNodeWorld(this);
     }
 
     public void updateNeighbors(){
         neighbors.clear();
         for(Node node : tree.nodesNear(this.getBounds())){
-            if(node.pos.distance(this.pos)<size && node!=this){
+            if(node.pos.distance(this.pos)< diameter && node!=this){
                 neighbors.add(node);
             }
         }
@@ -45,7 +48,7 @@ public class Node{
     public void draw(Graphics2D g){
         g.setColor(Color.GRAY);
         myShape.setFrame(getBounds());
-        //g.drawString("" + neighbors.size(), (float) pos.x, (float) pos.y);
+        //g.drawString("" + neighbors.diameter(), (float) pos.x, (float) pos.y);
         g.draw(myShape);
     }
 }
