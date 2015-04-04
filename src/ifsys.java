@@ -23,7 +23,7 @@ public class ifsys extends Panel
 
     double pixelsData[];
     double dataMax = 0;
-    double gamma = 0;
+    double zoom = 0;
     int pixels[];
     BufferedImage render;
     Graphics2D rg;
@@ -113,7 +113,7 @@ public class ifsys extends Panel
         maxPoints = 100;
         shape = new ifsShape(maxPoints);
         mouseScroll = 0;
-        gamma = 1.0D;
+        zoom = 1.0D;
         pointselected=-1;
     }
 
@@ -206,6 +206,7 @@ public class ifsys extends Panel
         addKeyListener(this);
         render =  new BufferedImage(screenwidth, screenheight, BufferedImage.TYPE_INT_RGB); //createImage(screenwidth, screenheight);
         rg = (Graphics2D)render.getGraphics();
+
         clearframe();
         game.start();
         shape.setToPreset(1);
@@ -215,10 +216,13 @@ public class ifsys extends Panel
     }
 
     public void update(Graphics gr){
+
         paint((Graphics2D)gr);
     }
 
     public void paint(Graphics2D gr){
+        rg = (Graphics2D)render.getGraphics();
+
         framesThisSecondDrawn++;
         if(System.currentTimeMillis()- oneSecondAgo >=1000){
             oneSecondAgo = System.currentTimeMillis();
@@ -231,9 +235,9 @@ public class ifsys extends Panel
         //generatePixels();
         //rg.drawImage(createImage(new MemoryImageSource(screenwidth, screenheight, pixels, 0, screenwidth)), 0, 0, screenwidth, screenheight, this);
         //rg.drawImage(sampleImage, getWidth() - 50, 0, 50, 50, this);
+
         rg.setColor(Color.black);
         rg.fillRect(0, 0, screenwidth, screenheight);
-        NodeWorld.drawNodes(rg);
 
         if(!infoHidden && pointselected>=0){
             rg.setColor(Color.white);
@@ -242,6 +246,10 @@ public class ifsys extends Panel
             rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, 15);
             rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, 30);
         }
+
+        rg.scale(zoom, zoom);
+        rg.translate((screenwidth/zoom-screenwidth)/2,(screenheight/zoom-screenheight)/2);
+        NodeWorld.drawNodes(rg);
 
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
@@ -268,6 +276,8 @@ public class ifsys extends Panel
 
         samplesThisFrame=0;
         dataMax = 0;
+
+
     }
 
     public boolean putPixel(double x, double y, double alpha){ 
@@ -288,7 +298,7 @@ public class ifsys extends Panel
                 pixelsData[(int)(x) + (int)(y+1) * screenwidth]+=alpha*decY*(1.0-decX);
                 pixelsData[(int)(x+1) + (int)(y+1) * screenwidth]+=alpha*decY*decX;
 
-                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/gamma){dataMax = pixelsData[(int)x + (int)y * screenwidth]/gamma;}
+                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/ zoom){dataMax = pixelsData[(int)x + (int)y * screenwidth]/ zoom;}
             }else{
                 pixelsData[(int)(x) + (int)(y) * screenwidth]=1;
             }
@@ -615,18 +625,20 @@ public class ifsys extends Panel
 
     public void mouseWheelMoved(MouseWheelEvent e) {
         mouseScroll += e.getWheelRotation();
-
+        System.out.println(zoom + "  zoom");
         double changeFactor = 0.9;
 
         if(e.getWheelRotation()>0){ //scroll down
-            if(shiftDown || ctrlDown){//decrease gamma
-                gamma*=0.9;
+            zoom *=0.9;
+            if(shiftDown || ctrlDown){//decrease zoom
+
             }else{//decrease point opacity
                 selectedPt.opacity*=changeFactor;
             }
         }else{ //scroll up
-            if(shiftDown || ctrlDown){//increase gamma
-                gamma/=0.9;
+            zoom /=0.9;
+            if(shiftDown || ctrlDown){//increase zoom
+
             }else{//increase point opacity
                 selectedPt.opacity/=changeFactor;
 
