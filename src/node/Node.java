@@ -31,7 +31,7 @@ public class Node{
 
     public void updatePos(){
         NodeBehaviors.moveBrownian(this, 0.1f); //corresponds to "temperature"?
-        NodeBehaviors.moveToMaintainNeighborDensity(this, 0.1550f);
+        NodeBehaviors.moveToMaintainNeighborDensity(this, NodeWorld.pressure);
         if(NodeWorld.gravityEnabled)NodeBehaviors.pullGravity(this);
         NodeBehaviors.restrictToNodeWorld(this);
     }

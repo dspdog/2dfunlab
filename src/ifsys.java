@@ -625,29 +625,19 @@ public class ifsys extends Panel
 
     public void mouseWheelMoved(MouseWheelEvent e) {
         mouseScroll += e.getWheelRotation();
-
-        double changeFactor = 0.9;
-
         if(e.getWheelRotation()>0){ //scroll down
-            zoom *=0.9;
-            if(shiftDown || ctrlDown){//decrease zoom
-
-            }else{//decrease point opacity
-                selectedPt.opacity*=changeFactor;
+            if(shiftDown){// || ctrlDown
+                NodeWorld.pressure*=0.9;
+                System.out.println("PRESSURE " + NodeWorld.pressure);
+            }else{
+                zoom *=0.9;
             }
         }else{ //scroll up
-            zoom /=0.9;
-            if(shiftDown || ctrlDown){//increase zoom
-
+            if(shiftDown){
+                NodeWorld.pressure/=0.9;
+                System.out.println("PRESSURE " + NodeWorld.pressure);
             }else{//increase point opacity
-                selectedPt.opacity/=changeFactor;
-
-                if(selectedPt.opacity>1){ //values above 1 break the line function so instead we reduce the other points for the same effect
-                    selectedPt.opacity=1.0D;
-                    for(int i=0; i<shape.pointsInUse; i++){
-                        shape.pts[i].opacity*=changeFactor;
-                    }
-                }
+                zoom /=0.9;
             }
         }
 

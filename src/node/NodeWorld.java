@@ -15,8 +15,9 @@ public class NodeWorld {
     private final static MyTree myTree = new MyTree(myBounds, maxNodeSize);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
-    public static int totalNodes = 1000;
+    public static int totalNodes = 4000;
 
+    public static float pressure = 0.1550f;
     public static boolean gravityEnabled=true;
 
     public static void resetWorld(){
