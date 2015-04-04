@@ -212,7 +212,7 @@ public class ifsys extends Panel
         shape.setToPreset(1);
         setSampleImg("meerkat.jpg");
         started = true;
-        NodeWorld.buildWorld();
+        NodeWorld.resetWorld();
     }
 
     public void update(Graphics gr){
@@ -625,7 +625,7 @@ public class ifsys extends Panel
 
     public void mouseWheelMoved(MouseWheelEvent e) {
         mouseScroll += e.getWheelRotation();
-        System.out.println(zoom + "  zoom");
+
         double changeFactor = 0.9;
 
         if(e.getWheelRotation()>0){ //scroll down
@@ -671,7 +671,10 @@ public class ifsys extends Panel
             ctrlDown=true;
         if(e.getKeyCode()==KeyEvent.VK_SHIFT)
             shiftDown=true;
-        shape.updateCenter();
+        if(e.getKeyChar() == 'r')
+            NodeWorld.resetWorld();
+        if(e.getKeyChar() == 'g')
+            NodeWorld.gravityEnabled=!NodeWorld.gravityEnabled;
         clearframe();
 
     }
@@ -683,41 +686,7 @@ public class ifsys extends Panel
             ctrlDown=false;
         if(e.getKeyCode()==KeyEvent.VK_SHIFT)
             shiftDown=false;
-        if(e.getKeyChar() == '/')
-            iterations++;
-        if(e.getKeyChar() == '.' && iterations > 1)
-            iterations--;
-        //if(e.getKeyChar() == 'a')
-        //    antiAliasing = !antiAliasing;
 
-        if(e.getKeyChar() == 's')
-            spokesHidden = !spokesHidden;
-        if(e.getKeyChar() == 'b'){
-            shape.autoScale = !shape.autoScale;
-            shape.updateCenter();
-        }
-
-        if(e.getKeyChar() == 'm')
-            sampletotal += 100;
-        if(e.getKeyChar() == 'n' && sampletotal > 1)
-            sampletotal -= 100;
-
-        if(e.getKeyChar() == '1')
-            shape.setToPreset(1);
-        if(e.getKeyChar() == '2')
-            shape.setToPreset(2);
-        if(e.getKeyChar() == '3')
-            shape.setToPreset(3);
-        if(e.getKeyChar() == '4')
-            shape.setToPreset(4);
-        if(e.getKeyChar() == '5')
-            shape.setToPreset(5);
-        if(e.getKeyChar() == '6')
-            shape.setToPreset(6);
-
-
-        //clearframe();
-        //gamefunc();
     }
 
     public void focusGained(FocusEvent focusevent){}

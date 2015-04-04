@@ -32,7 +32,7 @@ public class Node{
     public void updatePos(){
         NodeBehaviors.moveBrownian(this, 0.1f); //corresponds to "temperature"?
         NodeBehaviors.moveToMaintainNeighborDensity(this, 0.1550f);
-        NodeBehaviors.pullGravity(this);
+        if(NodeWorld.gravityEnabled)NodeBehaviors.pullGravity(this);
         NodeBehaviors.restrictToNodeWorld(this);
     }
 
@@ -50,6 +50,7 @@ public class Node{
         myShape.setFrame(getBounds());
         //g.drawString("" + neighbors.diameter(), (float) pos.x, (float) pos.y);
         g.fill(myShape);
+
         g.setColor(Color.BLACK);
         g.draw(myShape);
     }

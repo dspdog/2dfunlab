@@ -10,14 +10,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by user on 3/24/2015.
  */
 public class NodeWorld {
-    private final static double maxNodeSize = 32; //diameter
+    private final static double maxNodeSize = 16; //diameter
     public final static Rectangle myBounds = new Rectangle(0,0,1024,800);
     private final static MyTree myTree = new MyTree(myBounds, maxNodeSize);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
     public static int totalNodes = 1000;
 
-    public static void buildWorld(){
+    public static boolean gravityEnabled=true;
+
+    public static void resetWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
         for(int i=0; i<totalNodes; i++){
             tempNodes.add(new Node(Math.random()*512 + 256, Math.random()*512 + 256, maxNodeSize, myTree));
@@ -39,6 +41,8 @@ public class NodeWorld {
         for(Node node : nodes){
             node.draw(g);
         }
+        g.setColor(Color.RED);
+        g.draw(myBounds);
     }
 
     public static void update(double x, double y){
