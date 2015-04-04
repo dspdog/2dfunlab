@@ -15,7 +15,7 @@ public class NodeWorld {
     private final static MyTree myTree = new MyTree(myBounds, maxNodeSize);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
-    public static int totalNodes = 2000;
+    public static int totalNodes = 1000;
 
     public static void buildWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
