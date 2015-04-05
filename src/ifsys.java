@@ -243,8 +243,16 @@ public class ifsys extends Panel
             rg.setColor(Color.white);
 
             rg.setFont(screenFont);
-            rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, 15);
-            rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, 30);
+
+            int row = 15;
+
+            rg.drawString("NODES " + String.valueOf(NodeWorld.totalNodes) + " ", 5, row*1);
+            rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
+            rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
+            rg.drawString("ZOOM (SCROLL) " + String.valueOf(zoom), 5, row*4);
+            rg.drawString("PRESSURE (SHIFT-SCROLL) " + String.valueOf(NodeWorld.pressure), 5, row*5);
+            rg.drawString("TEMP (CTRL-SCROLL) " + String.valueOf(NodeWorld.temperature), 5, row*6);
+            rg.drawString("DISTGAMMA (ALT-SCROLL) " + String.valueOf(NodeWorld.distGamma), 5, row*7);
         }
 
         rg.scale(zoom, zoom);
@@ -626,16 +634,22 @@ public class ifsys extends Panel
     public void mouseWheelMoved(MouseWheelEvent e) {
         mouseScroll += e.getWheelRotation();
         if(e.getWheelRotation()>0){ //scroll down
-            if(shiftDown){// || ctrlDown
+            if(shiftDown){
                 NodeWorld.pressure*=0.9;
-                System.out.println("PRESSURE " + NodeWorld.pressure);
+            }else if(ctrlDown){
+                NodeWorld.temperature*=0.9;
+            }else if(altDown){
+                NodeWorld.distGamma *=0.9;
             }else{
                 zoom *=0.9;
             }
         }else{ //scroll up
             if(shiftDown){
                 NodeWorld.pressure/=0.9;
-                System.out.println("PRESSURE " + NodeWorld.pressure);
+            }else if(ctrlDown){
+                NodeWorld.temperature/=0.9;
+            }else if(altDown){
+                NodeWorld.distGamma /=0.9;
             }else{//increase point opacity
                 zoom /=0.9;
             }
@@ -664,7 +678,7 @@ public class ifsys extends Panel
         if(e.getKeyChar() == 'r')
             NodeWorld.resetWorld();
         if(e.getKeyChar() == 'g')
-            NodeWorld.gravityEnabled=!NodeWorld.gravityEnabled;
+            NodeWorld.gravityMode=(NodeWorld.gravityMode+1)%4;
         clearframe();
 
     }

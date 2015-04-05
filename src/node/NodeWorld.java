@@ -12,13 +12,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class NodeWorld {
     private final static double maxNodeSize = 16; //diameter
     public final static Rectangle myBounds = new Rectangle(0,0,1024,800);
-    private final static MyTree myTree = new MyTree(myBounds, maxNodeSize);
+    private final static MyTree myTree = new MyTree(myBounds, 32);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
     public static int totalNodes = 4000;
 
     public static float pressure = 0.1550f;
-    public static boolean gravityEnabled=true;
+    public static float temperature = 0.1550f;
+    public static float distGamma = 2f;
+    public static int gravityMode=0;
 
     public static void resetWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
@@ -39,9 +41,15 @@ public class NodeWorld {
     public static void drawNodes(Graphics2D g){
         //g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //anti aliasing on
         //myTree.drawGrid(g);
+
+        for(Node node : nodes){
+            node.drawNeighbors(g);
+        }
+
         for(Node node : nodes){
             node.draw(g);
         }
+
         g.setColor(Color.RED);
         g.draw(myBounds);
     }
