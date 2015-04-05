@@ -2,12 +2,40 @@ package node;
 
 import com.sun.javafx.geom.Vec2d;
 
+import java.util.ArrayList;
+
 /**
  * Created by user on 4/2/2015.
  */
 public class NodeBehaviors {
+    static float maxDistance=0f;
+
     public static void moveBrownian(Node node, float scale){
         node.setPos(node.pos.x+(Math.random()-0.5)*scale, node.pos.y+(Math.random()-0.5)*scale);
+    }
+
+    public static void findDistancesTo(Node node){
+        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; maxDistance=0;} //clear all distances
+        node.distToBase=0;
+        node.visited=true;
+        findNeighborDistances(node);
+    }
+
+    private static void findNeighborDistances(Node node){
+        node.visited=true;
+
+        for(Node neighbor : node.neighbors){
+            if(!neighbor.visited){
+                neighbor.distToBase=Math.min(neighbor.distToBase, node.distToBase+(float)neighbor.pos.distance(node.pos));
+                maxDistance=Math.max(maxDistance,neighbor.distToBase);
+            }
+        }
+
+        for(Node neighbor : node.neighbors){
+            if(!neighbor.visited) {
+                findNeighborDistances(neighbor);
+            }
+        }
     }
 
     public static void moveToMaintainNeighborDensity(Node node, float targetDensity){
@@ -26,6 +54,8 @@ public class NodeBehaviors {
                 densityGradient.set(densityGradient.x + neighborContribGrad.x, densityGradient.y + neighborContribGrad.y);
             }
         }
+
+        node.density = totalDensity;
 
         float error = totalDensity-targetDensity;
         float speedLimit = (float)node.diameter/8f;
@@ -68,5 +98,9 @@ public class NodeBehaviors {
                 node.setPos(node.pos.x+directionToCenter.x,node.pos.y+directionToCenter.y);
                 break;
         }
+    }
+
+    public static float getMaxDistance(){
+        return maxDistance;
     }
 }

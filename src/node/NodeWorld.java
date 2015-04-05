@@ -15,8 +15,9 @@ public class NodeWorld {
     private final static MyTree myTree = new MyTree(myBounds, 32);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
-    public static int totalNodes = 4000;
+    public static int totalNodes = 1000;
 
+    public static float zoom = 1.0f;
     public static float pressure = 0.1550f;
     public static float temperature = 0.1550f;
     public static float distGamma = 2f;
@@ -25,17 +26,9 @@ public class NodeWorld {
     public static void resetWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
         for(int i=0; i<totalNodes; i++){
-            tempNodes.add(new Node(Math.random()*512 + 256, Math.random()*512 + 256, maxNodeSize, myTree));
+            tempNodes.add(new Node(maxNodeSize, myTree, i));
         }
         nodes = new CopyOnWriteArrayList<Node>(tempNodes);
-    }
-
-    public static void getAverageNeighbors(){
-        float total=0;
-        for(Node node : nodes){
-            total+=node.neighbors.size();
-        }
-        //System.out.println("AV NEIGHBS " + total/nodes.diameter());
     }
 
     public static void drawNodes(Graphics2D g){
@@ -55,7 +48,6 @@ public class NodeWorld {
     }
 
     public static void update(double x, double y){
-
         myTree.clear();
         for(Node node : nodes) {
             node.updatePos();
@@ -65,11 +57,9 @@ public class NodeWorld {
             node.updateNeighbors();
         }
 
-        //getAverageNeighbors();
-
         if(nodes.size()>0){
             nodes.get(0).setPos(x-20,y-20);
+            NodeBehaviors.findDistancesTo(nodes.get(0));
         }
-
     }
 }

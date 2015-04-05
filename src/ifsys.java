@@ -1,8 +1,13 @@
 import node.NodeWorld;
+import org.jogamp.glg2d.GLG2DCanvas;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.net.URL;
@@ -23,7 +28,7 @@ public class ifsys extends Panel
 
     double pixelsData[];
     double dataMax = 0;
-    double zoom = 0;
+
     int pixels[];
     BufferedImage render;
     Graphics2D rg;
@@ -113,12 +118,13 @@ public class ifsys extends Panel
         maxPoints = 100;
         shape = new ifsShape(maxPoints);
         mouseScroll = 0;
-        zoom = 1.0D;
+
         pointselected=-1;
     }
 
     public static void main(String[] args) {
-        Frame f = new Frame();
+        JFrame f = new JFrame();
+
         f.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 System.exit(0);
@@ -133,6 +139,7 @@ public class ifsys extends Panel
         f.setSize(is.screenwidth, is.screenheight + 20); // add 20, seems enough for the Frame title,
         f.show();
 
+        /*
         MenuBar menuBar;
         Menu fileMenu, renderMenu, shapeMenu, guidesMenu, viewMenu;
 
@@ -152,7 +159,7 @@ public class ifsys extends Panel
             renderMenu.add(inButton);
 
         menuBar.add(renderMenu);
-        f.setMenuBar(menuBar);
+        f.setMenuBar(menuBar);*/
     }
 
     public void init() {
@@ -184,13 +191,15 @@ public class ifsys extends Panel
         public void run(){
             while(!quit){
                 framesThisSecondLogic++;
-                NodeWorld.update(mousex,mousey);
+                Point2D mousePt = new Point2D.Float(mousex,mousey);
+                Point2D _mousePt = new Point2D.Float(mousex,mousey);
+
+                try {
+                    _mousePt = cameraTransform.inverseTransform(mousePt,_mousePt);
+                } catch (NoninvertibleTransformException e) {e.printStackTrace();}
+
+                NodeWorld.update(_mousePt.getX(),_mousePt.getY());
                 repaint();
-                /*try {
-                    Thread.sleep(1L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
             }
         }
 
@@ -219,6 +228,8 @@ public class ifsys extends Panel
 
         paint((Graphics2D)gr);
     }
+
+    AffineTransform cameraTransform = new AffineTransform();
 
     public void paint(Graphics2D gr){
         rg = (Graphics2D)render.getGraphics();
@@ -249,14 +260,18 @@ public class ifsys extends Panel
             rg.drawString("NODES " + String.valueOf(NodeWorld.totalNodes) + " ", 5, row*1);
             rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
             rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
-            rg.drawString("ZOOM (SCROLL) " + String.valueOf(zoom), 5, row*4);
+            rg.drawString("ZOOM (SCROLL) " + String.valueOf(NodeWorld.zoom), 5, row*4);
             rg.drawString("PRESSURE (SHIFT-SCROLL) " + String.valueOf(NodeWorld.pressure), 5, row*5);
             rg.drawString("TEMP (CTRL-SCROLL) " + String.valueOf(NodeWorld.temperature), 5, row*6);
             rg.drawString("DISTGAMMA (ALT-SCROLL) " + String.valueOf(NodeWorld.distGamma), 5, row*7);
         }
 
-        rg.scale(zoom, zoom);
-        rg.translate((screenwidth/zoom-screenwidth)/2,(screenheight/zoom-screenheight)/2);
+        cameraTransform = new AffineTransform();
+        cameraTransform.scale(NodeWorld.zoom, NodeWorld.zoom);
+        cameraTransform.translate((screenwidth / NodeWorld.zoom - screenwidth) / 2, (screenheight / NodeWorld.zoom - screenheight) / 2);
+
+        rg.setTransform(cameraTransform);
+        rg.setStroke(new BasicStroke(1.0f / NodeWorld.zoom));
         NodeWorld.drawNodes(rg);
 
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
@@ -306,7 +321,7 @@ public class ifsys extends Panel
                 pixelsData[(int)(x) + (int)(y+1) * screenwidth]+=alpha*decY*(1.0-decX);
                 pixelsData[(int)(x+1) + (int)(y+1) * screenwidth]+=alpha*decY*decX;
 
-                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/ zoom){dataMax = pixelsData[(int)x + (int)y * screenwidth]/ zoom;}
+                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/ NodeWorld.zoom){dataMax = pixelsData[(int)x + (int)y * screenwidth]/ NodeWorld.zoom;}
             }else{
                 pixelsData[(int)(x) + (int)(y) * screenwidth]=1;
             }
@@ -641,7 +656,7 @@ public class ifsys extends Panel
             }else if(altDown){
                 NodeWorld.distGamma *=0.9;
             }else{
-                zoom *=0.9;
+                NodeWorld.zoom *=0.9;
             }
         }else{ //scroll up
             if(shiftDown){
@@ -651,7 +666,7 @@ public class ifsys extends Panel
             }else if(altDown){
                 NodeWorld.distGamma /=0.9;
             }else{//increase point opacity
-                zoom /=0.9;
+                NodeWorld.zoom /=0.9;
             }
         }
 

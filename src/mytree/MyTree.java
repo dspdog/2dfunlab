@@ -14,11 +14,11 @@ public class MyTree { //a grid not a tree
     double maxSlotSize;
     double maxNodeSize;
 
-    Rectangle treeBounds;
+    public Rectangle myBounds;
     ArrayList<Node>[][] cells; //TODO make this 1D
 
     public MyTree(Rectangle _bounds, double maxSize){
-        treeBounds = _bounds;
+        myBounds = _bounds;
         maxSlotSize = Math.max(maxSize, 8); //minimum grid size 8 pixels to avoid slowdowns
         maxNodeSize = maxSize;
         init();
@@ -27,17 +27,17 @@ public class MyTree { //a grid not a tree
     public void insert(Node node){ //uses upper left corner as anchor?
         double x = node.pos.x;
         double y = node.pos.y;
-        if(treeBounds.contains(x,y)){
+        if(myBounds.contains(x,y)){
             cellAt(x,y).add(node);
         }
     }
 
     public int quantizedX(double x){
-        return Math.max(Math.min((int)(widthInCells *(x- treeBounds.getMinX())/ treeBounds.width), widthInCells-1),0);
+        return Math.max(Math.min((int)(widthInCells *(x- myBounds.getMinX())/ myBounds.width), widthInCells-1),0);
     }
 
     public int quantizedY(double y){
-        return Math.max(Math.min((int)(heightInCells *(y- treeBounds.getMinY())/ treeBounds.height), heightInCells-1),0);
+        return Math.max(Math.min((int)(heightInCells *(y- myBounds.getMinY())/ myBounds.height), heightInCells-1),0);
     }
 
     public int cellIndex(double x, double y){
@@ -66,8 +66,8 @@ public class MyTree { //a grid not a tree
     }
 
     public void init(){
-        widthInCells = (int)(treeBounds.getWidth()/maxSlotSize);
-        heightInCells = (int)(treeBounds.getHeight()/maxSlotSize);
+        widthInCells = (int)(myBounds.getWidth()/maxSlotSize);
+        heightInCells = (int)(myBounds.getHeight()/maxSlotSize);
 
         cells = new ArrayList[widthInCells][heightInCells];
         for(int x=0; x< widthInCells; x++){
