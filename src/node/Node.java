@@ -16,6 +16,7 @@ public class Node{
     double density =0f;
     public int index;
     public float distToBase=999999f;
+    public float healthPts = 100f;
     public boolean visited =false;
 
     final Ellipse2D.Double myShape = new Ellipse2D.Double();
@@ -30,13 +31,19 @@ public class Node{
     public Node setIndex(int _index){index=_index; return this;}
     public Node setDiameter(double s){diameter =s; return this;}
     public Node setTree(MyTree t){tree=t; return this;}
-    public Node respawn(){this.setPos(tree.myBounds.getMinX()+Math.random()*tree.myBounds.width, tree.myBounds.getMinX()+Math.random()*tree.myBounds.height); return this;}
+    public Node respawn(){this.setPos(tree.myBounds.getMinX()+Math.random()*tree.myBounds.width, tree.myBounds.getMinX()+Math.random()*tree.myBounds.height); healthPts=200f*(float)Math.random(); return this;}
 
     public void updatePos(){
         NodeBehaviors.moveBrownian(this, NodeWorld.temperature);
         NodeBehaviors.moveToMaintainNeighborDensity(this, NodeWorld.pressure);
         NodeBehaviors.pullGravity(this, NodeWorld.gravityMode);
         NodeBehaviors.restrictToNodeWorld(this);
+        if(!this.visited){
+            this.healthPts*=0.995;
+            if(this.healthPts<1f){
+                this.respawn();
+            }
+        }
     }
 
     public void updateNeighbors(){

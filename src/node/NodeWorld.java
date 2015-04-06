@@ -21,7 +21,7 @@ public class NodeWorld {
     public static float pressure = 0.1550f;
     public static float temperature = 0.1550f;
     public static float distGamma = 2f;
-    public static int gravityMode=0;
+    public static int gravityMode=3;
 
     public static void resetWorld(){
         ArrayList<Node> tempNodes = new ArrayList<Node>();
