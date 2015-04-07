@@ -10,8 +10,12 @@ import java.util.ArrayList;
 public class NodeBehaviors {
     static float maxDistance=0f;
 
-    public static void moveBrownian(Node node, float scale){
-        node.setPos(node.pos.x+(Math.random()-0.5)*scale, node.pos.y+(Math.random()-0.5)*scale);
+    public static void splitMe(Node node){
+        NodeWorld.nodes.add(NodeBehaviors.moveBrownian(node.clone(), 0.1f));
+    }
+
+    public static Node moveBrownian(Node node, float scale){
+        return node.setPos(node.pos.x+(Math.random()-0.5)*scale, node.pos.y+(Math.random()-0.5)*scale);
     }
 
     public static void findDistancesTo(Node node){

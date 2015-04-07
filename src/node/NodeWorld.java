@@ -15,7 +15,6 @@ public class NodeWorld {
     private final static MyTree myTree = new MyTree(myBounds, 32);
 
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
-    public static int totalNodes = 1000;
 
     public static float zoom = 1.0f;
     public static float pressure = 0.1550f;
@@ -23,12 +22,12 @@ public class NodeWorld {
     public static float distGamma = 2f;
     public static int gravityMode=3;
 
-    public static void resetWorld(){
-        ArrayList<Node> tempNodes = new ArrayList<Node>();
+
+    public static void resetWorld(int totalNodes){
+        nodes = new CopyOnWriteArrayList<Node>();
         for(int i=0; i<totalNodes; i++){
-            tempNodes.add(new Node(maxNodeSize, myTree, i));
+            nodes.add(new Node(maxNodeSize, myTree));
         }
-        nodes = new CopyOnWriteArrayList<Node>(tempNodes);
     }
 
     public static void drawNodes(Graphics2D g){
@@ -58,7 +57,7 @@ public class NodeWorld {
         }
 
         if(nodes.size()>0){
-            nodes.get(0).setPos(x-20,y-20);
+            //nodes.get(0).setPos(x-20,y-20);
             NodeBehaviors.findDistancesTo(nodes.get(0));
         }
     }

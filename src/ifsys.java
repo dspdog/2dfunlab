@@ -221,7 +221,7 @@ public class ifsys extends Panel
         shape.setToPreset(1);
         setSampleImg("meerkat.jpg");
         started = true;
-        NodeWorld.resetWorld();
+        NodeWorld.resetWorld(1);
     }
 
     public void update(Graphics gr){
@@ -257,7 +257,7 @@ public class ifsys extends Panel
 
             int row = 15;
 
-            rg.drawString("NODES " + String.valueOf(NodeWorld.totalNodes) + " ", 5, row*1);
+            rg.drawString("NODES " + String.valueOf(NodeWorld.nodes.size()) + " ", 5, row*1);
             rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
             rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
             rg.drawString("ZOOM (SCROLL) " + String.valueOf(NodeWorld.zoom), 5, row*4);
@@ -691,7 +691,7 @@ public class ifsys extends Panel
         if(e.getKeyCode()==KeyEvent.VK_SHIFT)
             shiftDown=true;
         if(e.getKeyChar() == 'r')
-            NodeWorld.resetWorld();
+            NodeWorld.resetWorld(500);
         if(e.getKeyChar() == 'g')
             NodeWorld.gravityMode=(NodeWorld.gravityMode+1)%4;
         clearframe();
