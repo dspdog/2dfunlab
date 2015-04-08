@@ -247,7 +247,7 @@ public class ifsys extends Panel
         //rg.drawImage(createImage(new MemoryImageSource(screenwidth, screenheight, pixels, 0, screenwidth)), 0, 0, screenwidth, screenheight, this);
         //rg.drawImage(sampleImage, getWidth() - 50, 0, 50, 50, this);
 
-        rg.setColor(Color.black);
+        rg.setColor(new Color(0.1f,0.1f,0.1f));
         rg.fillRect(0, 0, screenwidth, screenheight);
 
         if(!infoHidden && pointselected>=0){

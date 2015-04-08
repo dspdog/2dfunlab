@@ -14,22 +14,35 @@ public class NodeBehaviors {
         NodeWorld.nodes.add(NodeBehaviors.moveBrownian(node.clone(), 0.1f));
     }
 
+    public static void removeMe(Node node){
+        NodeWorld.nodes.remove(node);
+    }
+
     public static Node moveBrownian(Node node, float scale){
         return node.setPos(node.pos.x+(Math.random()-0.5)*scale, node.pos.y+(Math.random()-0.5)*scale);
     }
 
     public static void findDistancesTo(Node node){
-        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; maxDistance=0;} //clear all distances
+        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; _node.nutrients=0f; maxDistance=0;} //clear all distances
         node.distToBase=0;
         node.visited=true;
+        node.nutrients=100f;
+
+        node.nutrientsTotal+=node.nutrients;
         findNeighborDistances(node);
     }
 
     private static void findNeighborDistances(Node node){
         node.visited=true;
 
+        float numFreeNeighbors = 0;// node.neighbors.size();
+
+        for(Node neighbor : node.neighbors){if(!neighbor.visited){numFreeNeighbors++;}}
+
         for(Node neighbor : node.neighbors){
             if(!neighbor.visited){
+                neighbor.nutrients+=node.nutrients/numFreeNeighbors;
+                neighbor.nutrientsTotal+=node.nutrients/numFreeNeighbors;
                 neighbor.distToBase=Math.min(neighbor.distToBase, node.distToBase+(float)neighbor.pos.distance(node.pos));
                 maxDistance=Math.max(maxDistance,neighbor.distToBase);
             }

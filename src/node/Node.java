@@ -16,8 +16,12 @@ public class Node{
     double density =0f;
     public int index;
     public float distToBase=999999f;
+    public float nutrients=0f;
+    public float nutrientsTotal=0f;
     public float healthPts = 50f;
     public boolean visited =false;
+
+    static float maxNutrients = 100f;
 
     final Ellipse2D.Double myShape = new Ellipse2D.Double();
     MyTree tree;
@@ -25,7 +29,7 @@ public class Node{
 
     public Rectangle getBounds(){return new Rectangle((int) (pos.x - diameter / 2), (int) (pos.y - diameter /2),(int) diameter,(int) diameter);}
     public Rectangle getBoundsScaled(float scale){return new Rectangle((int) (pos.x - diameter / 2*scale), (int) (pos.y - diameter /2*scale),(int)(diameter*scale),(int)( diameter*scale));}
-    public Node(double x, double y, double s, MyTree t){this.setPos(x, y).setDiameter(s).setTree(t).setIndex();}
+    public Node(double x, double y, double s, MyTree t){this.setPos(x, y).setDiameter(s).setTree(t).setIndex();nutrients=0f;nutrientsTotal=0f;}
     public Node(double s, MyTree t){this.setDiameter(s).setTree(t).respawn().setIndex();}
     public Node setPos(double x, double y){pos.set(x,y); return this;}
     public Node setIndex(){index=nextIndex(); return this;}
@@ -38,20 +42,33 @@ public class Node{
         NodeBehaviors.moveToMaintainNeighborDensity(this, NodeWorld.pressure);
         NodeBehaviors.pullGravity(this, NodeWorld.gravityMode);
         NodeBehaviors.restrictToNodeWorld(this);
-        if(!this.visited){
-            this.healthPts*=0.95;
-            //if(this.healthPts<1f){
-            //    this.respawn();
-            //}
-        }else{
-            //TODO increase health pts according to dist
-            float rnd = (float)Math.random();
 
-            if(rnd<0.001f){
+        float rnd = (float)Math.random();
+
+        /*if(nutrients>5f){
+            if(rnd<0.001f && NodeWorld.nodes.size()<1000){
                 NodeBehaviors.splitMe(this);
+            }
+        }else{
+            if(rnd<0.000001f && nutrients<0.00001f){
+                NodeBehaviors.removeMe(this);
+            }
+        }*/
+
+        if(nutrientsTotal>5f){
+            if(rnd<0.001f && NodeWorld.nodes.size()<10000){
+                NodeBehaviors.splitMe(this);
+            }
+        }else{
+            if(rnd<0.1f && NodeWorld.nodes.size()>5 && nutrientsTotal<1f){
+                NodeBehaviors.removeMe(this);
             }
         }
 
+
+        nutrientsTotal*=0.995f;
+
+        maxNutrients=Math.max(maxNutrients,nutrientsTotal);
     }
 
     public void updateNeighbors(){
@@ -64,22 +81,36 @@ public class Node{
     }
 
     public void drawNeighbors(Graphics2D g){
-        g.setColor(colorByHealth());
+        g.setColor(colorByNutrients());
         for(Node neighbor: neighbors){
             g.drawLine((int)pos.x,(int)pos.y,(int)neighbor.pos.x,(int)neighbor.pos.y);
         }
     }
 
     public void draw(Graphics2D g){
-        g.setColor(colorByHealth());
-        if(index==0)g.setColor(new Color(255,0,0));
-        myShape.setFrame(getBoundsScaled((float) ((density + 1) / (NodeWorld.pressure * 8f + 1))));
+        g.setColor(colorByNutrients());
+        if(NodeWorld.nodes.get(0)==this){
+            g.setColor(new Color(255,0,0));
+           // System.out.println(nutrients);
+        }
+        //myShape.setFrame(getBoundsScaled((float) ((density + 1) / (NodeWorld.pressure * 8f + 1))));
+        myShape.setFrame(getBoundsScaled(0.5f));
         g.fill(myShape);
     }
 
-    public Color colorByHealth(){
-        healthPts=Math.max(0,Math.min(healthPts,100f));
-        return new Color(healthPts/100f,healthPts/100f,healthPts/100f);
+    public Color colorByNutrients() {
+        float mod = maxNutrients/50f;
+        float color = Math.max(0,Math.min(nutrientsTotal,mod))/mod;
+        return new Color(color,color,color);
+    }
+
+    public Color colorByLogNutrients() {
+        float mod = maxNutrients;
+        float color = (float)(-Math.log10(Math.max(0,Math.min(nutrientsTotal,mod))/mod)%10f)/10f;
+
+        color = Math.max(0,Math.min(color, 1.0f));
+
+        return new Color(color,color,color);
     }
 
     public Color colorByStemDist(){
