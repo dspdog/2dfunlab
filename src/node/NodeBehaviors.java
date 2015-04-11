@@ -2,8 +2,6 @@ package node;
 
 import com.sun.javafx.geom.Vec2d;
 
-import java.util.ArrayList;
-
 /**
  * Created by user on 4/2/2015.
  */
@@ -23,12 +21,12 @@ public class NodeBehaviors {
     }
 
     public static void findDistancesTo(Node node){
-        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; _node.nutrients=0f; maxDistance=0;} //clear all distances
+        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; _node.voltageChange =0f; maxDistance=0;} //clear all distances
         node.distToBase=0;
         node.visited=true;
-        node.nutrients=100f;
+        node.voltageChange =100f;
 
-        node.nutrientsTotal+=node.nutrients;
+        node.voltageAccumulator +=node.voltageChange;
         findNeighborDistances(node);
     }
 
@@ -41,8 +39,8 @@ public class NodeBehaviors {
 
         for(Node neighbor : node.neighbors){
             if(!neighbor.visited){
-                neighbor.nutrients+=node.nutrients/numFreeNeighbors;
-                neighbor.nutrientsTotal+=node.nutrients/numFreeNeighbors;
+                neighbor.voltageChange +=node.voltageChange /numFreeNeighbors;
+                neighbor.voltageAccumulator +=node.voltageChange /numFreeNeighbors;
                 neighbor.distToBase=Math.min(neighbor.distToBase, node.distToBase+(float)neighbor.pos.distance(node.pos));
                 maxDistance=Math.max(maxDistance,neighbor.distToBase);
             }

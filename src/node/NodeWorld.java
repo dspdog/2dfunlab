@@ -17,7 +17,7 @@ public class NodeWorld {
     public static CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<Node>();
 
     public static float zoom = 1.0f;
-    public static float pressure = 0.1550f;
+    public static float pressure = 0.7550f;
     public static float temperature = 0.1550f;
     public static float distGamma = 2f;
     public static int gravityMode=3;
@@ -47,6 +47,10 @@ public class NodeWorld {
     }
 
     public static void update(double x, double y){
+
+        Node.maxVoltage *=0.9f;
+        Node.maxNeighbors*=0.999f;
+
         myTree.clear();
         for(Node node : nodes) {
             node.updatePos();
