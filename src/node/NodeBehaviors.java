@@ -2,6 +2,8 @@ package node;
 
 import com.sun.javafx.geom.Vec2d;
 
+import java.awt.*;
+
 /**
  * Created by user on 4/2/2015.
  */
@@ -21,36 +23,33 @@ public class NodeBehaviors {
     }
 
     public static void findDistancesTo(Node node){
-        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; _node.voltageChange =0f; maxDistance=0;} //clear all distances
+        for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; maxDistance=0;} //clear all distances
         node.distToBase=0;
         node.visited=true;
-        node.voltageChange =100f;
-
-        node.voltageAccumulator +=node.voltageChange;
+        node.voltageAccumulator += 100f;
         findNeighborDistances(node);
     }
 
     private static void findNeighborDistances(Node node){
-        node.visited=true;
-
+        float voltageThrottle = 0.1f; // voltage throttle = current?
         float numFreeNeighbors = 0;// node.neighbors.size();
 
         for(Node neighbor : node.neighbors){if(!neighbor.visited){numFreeNeighbors++;}}
 
         for(Node neighbor : node.neighbors){
             if(!neighbor.visited){
-                neighbor.voltageChange +=node.voltageChange /numFreeNeighbors;
-                neighbor.voltageAccumulator +=node.voltageChange /numFreeNeighbors;
+                neighbor.voltageAccumulator += voltageThrottle*(node.voltageAccumulator-neighbor.voltageAccumulator) / numFreeNeighbors;
                 neighbor.distToBase=Math.min(neighbor.distToBase, node.distToBase+(float)neighbor.pos.distance(node.pos));
                 maxDistance=Math.max(maxDistance,neighbor.distToBase);
             }
         }
-
+        node.visited=true;
         for(Node neighbor : node.neighbors){
             if(!neighbor.visited) {
                 findNeighborDistances(neighbor);
             }
         }
+
     }
 
     public static void moveToMaintainNeighborDensity(Node node, float targetDensity){
@@ -86,6 +85,12 @@ public class NodeBehaviors {
         float pad = (float)node.diameter;
         node.setPos(Math.max(node.pos.x, NodeWorld.myBounds.getMinX()+pad), Math.max(node.pos.y, NodeWorld.myBounds.getMinY()+pad));
         node.setPos(Math.min(node.pos.x, NodeWorld.myBounds.getMaxX()-pad), Math.min(node.pos.y, NodeWorld.myBounds.getMaxY()-pad));
+    }
+
+    public static void suckVoltageIfEdgeNode(Node node){
+        float ambientVoltage = 0.1f;
+        float colorNeighbors = (float)Math.max(0,Math.min(node.neighbors.size()/Node.maxNeighbors,1.0));
+        if(colorNeighbors<0.5f && node.voltageAccumulator>ambientVoltage)node.voltageAccumulator-=5f;
     }
 
     public static void pullGravity(Node node, int mode){

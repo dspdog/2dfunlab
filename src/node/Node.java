@@ -16,7 +16,7 @@ public class Node{
     double density =0f;
     public int index;
     public float distToBase=999999f;
-    public float voltageChange =0f;
+
     public float voltageAccumulator =0f;
     public float healthPts = 50f;
     public boolean visited =false;
@@ -31,7 +31,6 @@ public class Node{
     public Rectangle getBounds(){return new Rectangle((int) (pos.x - diameter / 2), (int) (pos.y - diameter /2),(int) diameter,(int) diameter);}
     public Rectangle getBoundsScaled(float scale){return new Rectangle((int) (pos.x - diameter / 2*scale), (int) (pos.y - diameter /2*scale),(int)(diameter*scale),(int)( diameter*scale));}
     public Node(double x, double y, double s, MyTree t){this.setPos(x, y).setDiameter(s).setTree(t).setIndex();
-        voltageChange =0f;
         voltageAccumulator =0f;}
     public Node(double s, MyTree t){this.setDiameter(s).setTree(t).respawn().setIndex();}
     public Node setPos(double x, double y){pos.set(x,y); return this;}
@@ -44,7 +43,9 @@ public class Node{
         NodeBehaviors.moveBrownian(this, NodeWorld.temperature);
         NodeBehaviors.moveToMaintainNeighborDensity(this, NodeWorld.pressure);
         NodeBehaviors.pullGravity(this, NodeWorld.gravityMode);
+        NodeBehaviors.suckVoltageIfEdgeNode(this);
         NodeBehaviors.restrictToNodeWorld(this);
+
 
         float rnd = (float)Math.random();
 
@@ -92,6 +93,7 @@ public class Node{
     }
 
     public void draw(Graphics2D g){
+        //g.setColor(new Color(0.0f,0.0f,0.0f,0.25f));
         g.setColor(colorByNeighbors());
         if(NodeWorld.nodes.get(0)==this){
             g.setColor(new Color(255,0,0));
@@ -100,6 +102,9 @@ public class Node{
         //myShape.setFrame(getBoundsScaled((float) ((density + 1) / (NodeWorld.pressure * 8f + 1))));
         myShape.setFrame(getBoundsScaled(0.5f));
         g.fill(myShape);
+        for(Node neighbor: neighbors){
+            g.drawLine((int)pos.x,(int)pos.y,(int)neighbor.pos.x,(int)neighbor.pos.y);
+        }
     }
 
     public Color colorByNeighbors() {
@@ -110,7 +115,7 @@ public class Node{
 
         if(colorNeighbors<0.5f)return new Color(0.0f,0f,0f);
 
-        return new Color(colorNeighbors,color,color);
+        return new Color(colorNeighbors/2f,color,color);//, 0.25f);
     }
 
 
