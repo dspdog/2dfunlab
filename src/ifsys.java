@@ -265,10 +265,10 @@ public class ifsys extends Panel
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
 
         cameraTransform = new AffineTransform();
+        cameraTransform.translate(screenwidth/2,screenheight/2);
+        cameraTransform.scale(zoom, zoom);
+        cameraTransform.translate(-centerPt.getX(), -centerPt.getY());
 
-        //cameraTransform.scale(zoom, zoom);
-        cameraTransform.translate(-centerPt.getX()+(screenwidth/2), -centerPt.getY()+(screenheight/2));
-      
         rg.setTransform(cameraTransform);
         rg.setStroke(new BasicStroke(1.0f / (float)zoom));
 
