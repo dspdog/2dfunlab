@@ -3,7 +3,6 @@ package node;
 import mytree.MyTree;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -62,7 +61,7 @@ public class NodeWorld {
 
         if(nodes.size()>0){
             //nodes.get(0).setPos(x-20,y-20);
-            NodeBehaviors.findDistancesTo(nodes.get(0));
+            NodeBehaviors.pushVoltageFrom(nodes.get(0));
         }
     }
 }

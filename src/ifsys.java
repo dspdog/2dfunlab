@@ -200,6 +200,11 @@ public class ifsys extends Panel
 
                 NodeWorld.update(_mousePt.getX(),_mousePt.getY());
                 repaint();
+                try {
+                    sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -221,7 +226,7 @@ public class ifsys extends Panel
         shape.setToPreset(1);
         setSampleImg("meerkat.jpg");
         started = true;
-        NodeWorld.resetWorld(1);
+        //NodeWorld.resetWorld(1);
     }
 
     public void update(Graphics gr){

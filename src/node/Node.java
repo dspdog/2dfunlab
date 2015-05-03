@@ -49,16 +49,6 @@ public class Node{
 
         float rnd = (float)Math.random();
 
-        /*if(voltageChange>5f){
-            if(rnd<0.001f && NodeWorld.nodes.size()<1000){
-                NodeBehaviors.splitMe(this);
-            }
-        }else{
-            if(rnd<0.000001f && voltageChange<0.00001f){
-                NodeBehaviors.removeMe(this);
-            }
-        }*/
-
         if(voltageAccumulator >5f){
             if(rnd<0.001f && NodeWorld.nodes.size()<10000){
                 NodeBehaviors.splitMe(this);
@@ -69,11 +59,10 @@ public class Node{
             }
         }
 
+        voltageAccumulator *=0.9995f;
 
-        voltageAccumulator *=0.995f;
-
-        maxVoltage =Math.max(maxVoltage, voltageAccumulator);
-        maxNeighbors =Math.max(maxNeighbors, neighbors.size());
+        maxVoltage = Math.max(maxVoltage, voltageAccumulator);
+        maxNeighbors = Math.max(maxNeighbors, neighbors.size());
     }
 
     public void updateNeighbors(){
@@ -100,11 +89,13 @@ public class Node{
            // System.out.println(voltageChange);
         }
         //myShape.setFrame(getBoundsScaled((float) ((density + 1) / (NodeWorld.pressure * 8f + 1))));
+
         myShape.setFrame(getBoundsScaled(0.5f));
         g.fill(myShape);
-        for(Node neighbor: neighbors){
+
+        /*for(Node neighbor: neighbors){
             g.drawLine((int)pos.x,(int)pos.y,(int)neighbor.pos.x,(int)neighbor.pos.y);
-        }
+        }*/
     }
 
     public Color colorByNeighbors() {

@@ -2,8 +2,6 @@ package node;
 
 import com.sun.javafx.geom.Vec2d;
 
-import java.awt.*;
-
 /**
  * Created by user on 4/2/2015.
  */
@@ -22,15 +20,15 @@ public class NodeBehaviors {
         return node.setPos(node.pos.x+(Math.random()-0.5)*scale, node.pos.y+(Math.random()-0.5)*scale);
     }
 
-    public static void findDistancesTo(Node node){
+    public static void pushVoltageFrom(Node node){
         for(Node _node : NodeWorld.nodes){_node.distToBase=999999f; _node.visited=false; maxDistance=0;} //clear all distances
         node.distToBase=0;
         node.visited=true;
         node.voltageAccumulator += 100f;
-        findNeighborDistances(node);
+        pushVoltage(node);
     }
 
-    private static void findNeighborDistances(Node node){
+    private static void pushVoltage(Node node){
         float voltageThrottle = 0.1f; // voltage throttle = current?
         float numFreeNeighbors = 0;// node.neighbors.size();
 
@@ -44,12 +42,12 @@ public class NodeBehaviors {
             }
         }
         node.visited=true;
+
         for(Node neighbor : node.neighbors){
             if(!neighbor.visited) {
-                findNeighborDistances(neighbor);
+                pushVoltage(neighbor);
             }
         }
-
     }
 
     public static void moveToMaintainNeighborDensity(Node node, float targetDensity){
