@@ -24,7 +24,7 @@ public class Node{
     static float maxVoltage = 100f;
     static float maxNeighbors = 1f;
 
-    final Ellipse2D.Double myShape = new Ellipse2D.Double();
+    final Ellipse2D.Double myShape = new  Ellipse2D.Double ();
     MyTree tree;
     CopyOnWriteArrayList<Node> neighbors = new CopyOnWriteArrayList<Node>();
 
@@ -111,7 +111,7 @@ public class Node{
 
     public Color colorByNeighbors() {
         //float mod = maxVoltage/50f;
-        float mod = maxVoltage /50f;
+        float mod = maxVoltage /10f;
         float color = Math.max(0,Math.min(voltageAccumulator,mod))/mod;
         float colorNeighbors = (float)Math.max(0,Math.min(this.neighbors.size()/maxNeighbors,1.0));
 
