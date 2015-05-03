@@ -1,5 +1,3 @@
-import node.NodeWorld;
-import org.jogamp.glg2d.GLG2DCanvas;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,6 +14,10 @@ public class ifsys extends Panel
     implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, ActionListener,
         ItemListener
 {
+
+    Point2D realMousePt;
+    Point2D centerPt = new Point2D.Double(512,512);
+
     final mainthread game;
     boolean quit;
     final int screenwidth;
@@ -41,6 +43,8 @@ public class ifsys extends Panel
     long samplesThisFrame;
     double samplesNeeded;
 
+    double zoom = 1.0;
+
     Image sampleImage;
 
     //user params
@@ -56,7 +60,7 @@ public class ifsys extends Panel
         int sampletotal;
         int iterations;
         int pointselected;
-        ifsPt selectedPt;
+
 
         boolean shiftDown;
         boolean ctrlDown;
@@ -65,7 +69,6 @@ public class ifsys extends Panel
         static int mousey;
         int mouseScroll;
 
-    ifsShape shape;
     double shapeArea;
     double shapeAreaDelta;
 
@@ -115,8 +118,7 @@ public class ifsys extends Panel
         mousemode = 0;
         samplesNeeded = 1;
         maxLineLength = screenwidth;
-        maxPoints = 100;
-        shape = new ifsShape(maxPoints);
+
         mouseScroll = 0;
 
         pointselected=-1;
@@ -169,8 +171,7 @@ public class ifsys extends Panel
 
 
     public void findSelectedPoint(){
-        pointselected = shape.getNearestPtIndex(mousex, mousey);
-        selectedPt = shape.pts[pointselected];
+
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -187,6 +188,7 @@ public class ifsys extends Panel
             }
     }
 
+
     public class mainthread extends Thread{
         public void run(){
             while(!quit){
@@ -198,7 +200,8 @@ public class ifsys extends Panel
                     _mousePt = cameraTransform.inverseTransform(mousePt,_mousePt);
                 } catch (NoninvertibleTransformException e) {e.printStackTrace();}
 
-                NodeWorld.update(_mousePt.getX(),_mousePt.getY());
+                realMousePt = _mousePt;
+
                 repaint();
                 try {
                     sleep(1);
@@ -223,7 +226,7 @@ public class ifsys extends Panel
 
         clearframe();
         game.start();
-        shape.setToPreset(1);
+
         setSampleImg("meerkat.jpg");
         started = true;
         //NodeWorld.resetWorld(1);
@@ -255,29 +258,26 @@ public class ifsys extends Panel
         rg.setColor(new Color(0.1f,0.1f,0.1f));
         rg.fillRect(0, 0, screenwidth, screenheight);
 
-        if(!infoHidden && pointselected>=0){
-            rg.setColor(Color.white);
-
-            rg.setFont(screenFont);
-
-            int row = 15;
-
-            rg.drawString("NODES " + String.valueOf(NodeWorld.nodes.size()) + " ", 5, row*1);
-            rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
-            rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
-            rg.drawString("ZOOM (SCROLL) " + String.valueOf(NodeWorld.zoom), 5, row*4);
-            rg.drawString("PRESSURE (SHIFT-SCROLL) " + String.valueOf(NodeWorld.pressure), 5, row*5);
-            rg.drawString("TEMP (CTRL-SCROLL) " + String.valueOf(NodeWorld.temperature), 5, row*6);
-            rg.drawString("DISTGAMMA (ALT-SCROLL) " + String.valueOf(NodeWorld.distGamma), 5, row*7);
-        }
+        rg.setColor(Color.white);
+        rg.setFont(screenFont);
+        int row = 15;
+        rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
+        rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
 
         cameraTransform = new AffineTransform();
-        cameraTransform.scale(NodeWorld.zoom, NodeWorld.zoom);
-        cameraTransform.translate((screenwidth / NodeWorld.zoom - screenwidth) / 2, (screenheight / NodeWorld.zoom - screenheight) / 2);
 
+        //cameraTransform.scale(zoom, zoom);
+        cameraTransform.translate(-centerPt.getX()+(screenwidth/2), -centerPt.getY()+(screenheight/2));
+      
         rg.setTransform(cameraTransform);
-        rg.setStroke(new BasicStroke(1.0f / NodeWorld.zoom));
-        NodeWorld.drawNodes(rg);
+        rg.setStroke(new BasicStroke(1.0f / (float)zoom));
+
+        rg.drawRect(0,0,100,100);
+        rg.drawRect(100,100,200,200);
+        rg.drawRect(200,200,300,300);
+
+        rg.setColor(Color.red);
+        rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
 
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
@@ -326,7 +326,7 @@ public class ifsys extends Panel
                 pixelsData[(int)(x) + (int)(y+1) * screenwidth]+=alpha*decY*(1.0-decX);
                 pixelsData[(int)(x+1) + (int)(y+1) * screenwidth]+=alpha*decY*decX;
 
-                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/ NodeWorld.zoom){dataMax = pixelsData[(int)x + (int)y * screenwidth]/ NodeWorld.zoom;}
+                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/ zoom){dataMax = pixelsData[(int)x + (int)y * screenwidth]/ zoom;}
             }else{
                 pixelsData[(int)(x) + (int)(y) * screenwidth]=1;
             }
@@ -370,167 +370,6 @@ public class ifsys extends Panel
         }
     }
 
-    public void putImgSample(double x, double y, double cumulativeRotation, double cumulativeScale, double cumulativeOpacity, ifsPt thePt, double scaleDown){
-        //generate random coords
-        double sampleX = Math.random()*sampleWidth;
-        double sampleY = Math.random()*sampleHeight;
-
-        //modulate with image
-        double exposureAdjust = cumulativeScale*thePt.scale*thePt.radius;
-        double ptColor = getSampleValue(sampleX,  sampleY)*cumulativeOpacity/scaleDown*exposureAdjust*exposureAdjust;
-
-        //rotate/scale the point
-        double pointDegrees = Math.atan2(sampleX - sampleWidth/2, sampleY - sampleHeight/2)+cumulativeRotation+thePt.rotation-thePt.degrees;
-        double pointDist = shape.distance(sampleX - sampleWidth/2, sampleY - sampleHeight/2)*cumulativeScale*thePt.scale*thePt.radius/sampleWidth;
-        double placedX = Math.cos(pointDegrees)*pointDist;
-        double placedY = Math.sin(pointDegrees)*pointDist;
-
-        //put pixel
-        putPixel(x+placedX,y+placedY, ptColor);
-    }
-
-    public void putLine(double x0, double y0, double x1, double y1, double alpha){ //TODO start/end alpha values?
-        double steps = (int)shape.distance(x0-x1, y0-y1);
-        double dx, dy;
-
-        boolean startedInScreen = false;
-
-        if(steps>maxLineLength){steps=maxLineLength;}
-
-        samplesThisFrame++;
-
-        for(int i=0; i<steps; i++){
-            dx = x0 + i*(x1-x0)/steps;
-            dy = y0 + i*(y1-y0)/steps;
-
-            if(putPixel(dx, dy, alpha)){ //stop drawing if pixel is outside bounds
-                startedInScreen = true;
-            }else{
-                if(startedInScreen)break;
-            };
-        }
-    }
-
-    public void fractalFunction(){
-         /*samplesNeeded = Math.pow(shape.pointsInUse, iterations);
-
-        if(shape.pointsInUse != 0){
-
-            if(!centerHidden){
-                if(!spokesHidden){ //center spokes
-                    for(int a=0; a<shape.pointsInUse; a++){
-                        putLine(shape.centerx, shape.centery, shape.pts[a].x, shape.pts[a].y, shape.pts[a].opacity);
-                    }
-                }
-
-                if(!framesHidden){ //center outline
-                    for(int a=0; a<shape.pointsInUse; a++){
-                        int nextPt = (a+1)%shape.pointsInUse;
-                        putLine(shape.pts[a].x, shape.pts[a].y, shape.pts[nextPt].x, shape.pts[nextPt].y, shape.pts[nextPt].opacity);
-                    }
-                }
-            }
-
-            for(int a = 0; a < sampletotal; a++){
-                int randomIndex = (int)(Math.random() * (double) shape.pointsInUse);
-                int nextIndex = (randomIndex+1)%shape.pointsInUse;
-                double dx = shape.pts[randomIndex].x;
-                double dy = shape.pts[randomIndex].y;
-                double ndx;
-                double ndy;
-                double _dx;
-                double _dy;
-                double cumulativeScale = 1.0D;
-                double nextCumulativeScale = 1.0D;
-                double cumulativeRotation = shape.pts[randomIndex].rotation;
-                double nextCumulativeRotation = shape.pts[randomIndex].rotation;
-                double cumulativeOpacity = 1.0D;
-
-                double scaleDownMultiplier = Math.pow(shape.pointsInUse,iterations-1); //this variable is used to tone down repeated pixels so leaves and branches are equally exposed
-
-                for(int d = 0; d < iterations; d++){
-                    scaleDownMultiplier/=shape.pointsInUse;
-
-                    randomIndex = (int)(Math.random() * (double) shape.pointsInUse);
-                    nextIndex = (randomIndex+1)%shape.pointsInUse;
-
-                    nextCumulativeScale = cumulativeScale*shape.pts[nextIndex].scale;
-                    nextCumulativeRotation = cumulativeRotation + shape.pts[nextIndex].rotation;
-
-                    cumulativeScale *= shape.pts[randomIndex].scale;
-                    cumulativeRotation += shape.pts[randomIndex].rotation;
-                    cumulativeOpacity *= shape.pts[randomIndex].opacity;
-
-                    _dx = dx;
-                    _dy = dy;
-                    dx += Math.cos((Math.PI/2D - shape.pts[randomIndex].degrees) + cumulativeRotation) * shape.pts[randomIndex].radius * cumulativeScale;
-                    dy += Math.sin((Math.PI/2D - shape.pts[randomIndex].degrees) + cumulativeRotation) * shape.pts[randomIndex].radius * cumulativeScale;
-
-                    if(!framesHidden){
-                        ndx = _dx + Math.cos((Math.PI/2D - shape.pts[nextIndex].degrees) + nextCumulativeRotation) * shape.pts[nextIndex].radius * nextCumulativeScale;
-                        ndy = _dy + Math.sin((Math.PI/2D - shape.pts[nextIndex].degrees) + nextCumulativeRotation) * shape.pts[nextIndex].radius * nextCumulativeScale;
-
-                        putLine(dx, dy, ndx, ndy, cumulativeOpacity/scaleDownMultiplier); //TODO proper transparent lines?
-                    }
-                    if(!trailsHidden && d < iterations-1)
-                        putPixel(dx, dy, shape.pts[randomIndex].opacity);
-                    if(!spokesHidden)
-                        putLine(_dx, _dy, dx, dy, cumulativeOpacity/scaleDownMultiplier);
-                    if(imgSamples)
-                        putImgSample(dx, dy, cumulativeRotation, cumulativeScale, cumulativeOpacity, shape.pts[randomIndex], scaleDownMultiplier);
-                }
-                if(!leavesHidden)
-                    putPixel(dx, dy, cumulativeOpacity);
-            }
-
-            if(!ptsHidden){
-                for(int a = 0; a < shape.pointsInUse; a++){
-                   drawPtDot(a);
-                }
-                if(!centerHidden || ctrlDown || shiftDown)
-                    drawPtDot(-1);
-            }
-        }*/
-    }
-
-    public void drawPtDot(int pointIndex){
-        int pointx1;
-        int pointy1;
-
-        if(pointIndex==-1){//center pt
-            pointx1 = (int)shape.centerx;
-            pointy1 = (int)shape.centery;
-        }else{
-            pointx1 = (int)shape.pts[pointIndex].x;
-            pointy1 = (int)shape.pts[pointIndex].y;
-        }
-
-        if(pointx1 > screenwidth - 2)
-            pointx1 = screenwidth - 2;
-        if(pointy1 > screenheight - 2)
-            pointy1 = screenheight - 2;
-        if(pointx1 < 0)
-            pointx1 = 0;
-        if(pointy1 < 0)
-            pointy1 = 0;
-        if(pointIndex == pointselected){
-            pixels[pointx1 + pointy1 * screenwidth] = 0xff00ff00;
-            pixels[pointx1 + 1 + pointy1 * screenwidth] = 0xff00ff00;
-            pixels[pointx1 + (pointy1 + 1) * screenwidth] = 0xff00ff00;
-            pixels[pointx1 + 1 + (pointy1 + 1) * screenwidth] = 0xff00ff00;
-        } else if(pointIndex != -1){ //non selected non central pt
-            pixels[pointx1 + pointy1 * screenwidth] = 0xffff0000;
-            pixels[pointx1 + 1 + pointy1 * screenwidth] = 0xffff0000;
-            pixels[pointx1 + (pointy1 + 1) * screenwidth] = 0xffff0000;
-            pixels[pointx1 + 1 + (pointy1 + 1) * screenwidth] = 0xffff0000;
-        } else { //central pt
-            pixels[pointx1 + pointy1 * screenwidth] = 0xff00ffff;
-            pixels[pointx1 + 1 + pointy1 * screenwidth] = 0xff00ffff;
-            pixels[pointx1 + (pointy1 + 1) * screenwidth] = 0xff00ffff;
-            pixels[pointx1 + 1 + (pointy1 + 1) * screenwidth] = 0xff00ffff;
-        }
-    }
-
     public Image loadImage(String name){
         try{
             URL theImgURL = new URL("file:/C:/Users/user/workspace/instant-ifs/instant-ifs/img/" + name);//file:/C:/Users/Labrats/Documents/GitHub/
@@ -555,32 +394,25 @@ public class ifsys extends Panel
 
         if(e.getClickCount()==2){
             if(mousemode == 1){ //add point w/ double click
-                shape.addPoint(mousex, mousey);
+
                 clearframe();
 
             }else if(mousemode == 3){ //remove point w/ double right click
-                shape.deletePoint(pointselected);
+
                 clearframe();
 
             }
         }else{
             startDragX = e.getX();
             startDragY = e.getY();
-            shape.updateCenter();
+
 
             if(ctrlDown || shiftDown){
-                shape.saveState();
-                startDragPX = shape.centerx;
-                startDragPY = shape.centery;
-                startDragDist = shape.distance(startDragX - shape.centerx, startDragY - shape.centery);
-                startDragAngle = 0 + Math.atan2(startDragX - shape.centerx, startDragY - shape.centery);
+
+
                 startDragScale = 1.0;
             }else{
-                startDragPX = selectedPt.x;
-                startDragPY = selectedPt.y;
-                startDragDist = shape.distance(startDragX - selectedPt.x, startDragY - selectedPt.y);
-                startDragAngle = selectedPt.rotation + Math.atan2(startDragX - selectedPt.x, startDragY - selectedPt.y);
-                startDragScale = selectedPt.scale;
+
             }
 
             requestFocus();
@@ -601,52 +433,7 @@ public class ifsys extends Panel
     }
 
     public void mouseDragged(MouseEvent e){
-        if(mousemode == 1){ //left click to move a point/set
-            setCursor (Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-            if(ctrlDown){
-                for(int i=0; i<shape.pointsInUse; i++){
-                    shape.pts[i].x = shape.pts[i].savedx + (e.getX() - startDragX);
-                    shape.pts[i].y = shape.pts[i].savedy + (e.getY() - startDragY);
-                }
-                shape.centerx = startDragPX + (e.getX() - startDragX);
-                shape.centery = startDragPY + (e.getY() - startDragY);
-            }else if(shiftDown){ //move the center
-                shape.centerx = startDragPX + (e.getX() - startDragX);
-                shape.centery = startDragPY + (e.getY() - startDragY);
-            }else{ //move a single point
-                selectedPt.x = startDragPX + (e.getX() - startDragX);
-                selectedPt.y = startDragPY + (e.getY() - startDragY);
-            }
-        }
-        else if(mousemode == 3){ //right click to rotate point/set
-            setCursor (Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
 
-            if(ctrlDown){ //rotate the set
-                double rotationDelta = (Math.atan2(e.getX() - shape.centerx , e.getY() - shape.centery )- startDragAngle);
-                double scaleDelta = shape.distance(e.getX() - shape.centerx , e.getY() - shape.centery )/startDragDist;
-
-                for(int i=0; i<shape.pointsInUse; i++){
-                    shape.pts[i].x = shape.centerx + scaleDelta * shape.pts[i].savedradius*Math.cos(Math.PI / 2 - shape.pts[i].saveddegrees - rotationDelta);
-                    shape.pts[i].y = shape.centery + scaleDelta * shape.pts[i].savedradius*Math.sin(Math.PI / 2 - shape.pts[i].saveddegrees - rotationDelta);
-                }
-            }else if(shiftDown){ //rotate all points in unison
-                double rotationDelta = (Math.atan2(e.getX() - shape.centerx, e.getY() - shape.centery)- startDragAngle);
-                double scaleDelta = shape.distance(e.getX() - shape.centerx, e.getY() - shape.centery)/startDragDist;
-
-                for(int i=0; i<shape.pointsInUse; i++){
-                    shape.pts[i].rotation = shape.pts[i].savedrotation + (Math.PI * 2 - rotationDelta);
-                    shape.pts[i].scale = shape.pts[i].savedscale*scaleDelta;
-                }
-            }else{ //move a single point
-                double rotationDelta = (Math.atan2(e.getX() - selectedPt.x, e.getY() - selectedPt.y)- startDragAngle);
-                double scaleDelta = shape.distance(e.getX() - selectedPt.x, e.getY() - selectedPt.y)/startDragDist;
-
-                selectedPt.rotation = Math.PI * 2 - rotationDelta;
-                selectedPt.scale = startDragScale*scaleDelta;
-            }
-        }
-
-        shape.updateCenter();
         clearframe();
 
     }
@@ -655,23 +442,23 @@ public class ifsys extends Panel
         mouseScroll += e.getWheelRotation();
         if(e.getWheelRotation()>0){ //scroll down
             if(shiftDown){
-                NodeWorld.pressure*=0.9;
+
             }else if(ctrlDown){
-                NodeWorld.temperature*=0.9;
+
             }else if(altDown){
-                NodeWorld.distGamma *=0.9;
+
             }else{
-                NodeWorld.zoom *=0.9;
+                zoom *=0.99;
             }
         }else{ //scroll up
             if(shiftDown){
-                NodeWorld.pressure/=0.9;
+
             }else if(ctrlDown){
-                NodeWorld.temperature/=0.9;
+
             }else if(altDown){
-                NodeWorld.distGamma /=0.9;
+
             }else{//increase point opacity
-                NodeWorld.zoom /=0.9;
+                zoom /=0.99;
             }
         }
 
@@ -695,11 +482,17 @@ public class ifsys extends Panel
             ctrlDown=true;
         if(e.getKeyCode()==KeyEvent.VK_SHIFT)
             shiftDown=true;
-        if(e.getKeyChar() == 'r')
-            NodeWorld.resetWorld(500);
-        if(e.getKeyChar() == 'g')
-            NodeWorld.gravityMode=(NodeWorld.gravityMode+1)%4;
+        if(e.getKeyChar() == 'a')
+            centerPt.setLocation(centerPt.getX()-10,centerPt.getY());
+        if(e.getKeyChar() == 'd')
+            centerPt.setLocation(centerPt.getX() + 10, centerPt.getY());
+        if(e.getKeyChar() == 'w')
+            centerPt.setLocation(centerPt.getX(),centerPt.getY()-10);
+        if(e.getKeyChar() == 's'){
+            centerPt.setLocation(centerPt.getX(),centerPt.getY()+10);
+        }
         clearframe();
+
 
     }
 
