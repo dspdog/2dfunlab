@@ -101,10 +101,12 @@ public class Node{
         }
         //myShape.setFrame(getBoundsScaled((float) ((density + 1) / (NodeWorld.pressure * 8f + 1))));
         myShape.setFrame(getBoundsScaled(0.5f));
-        g.fill(myShape);
+
         for(Node neighbor: neighbors){
             g.drawLine((int)pos.x,(int)pos.y,(int)neighbor.pos.x,(int)neighbor.pos.y);
         }
+
+        g.fill(myShape);
     }
 
     public Color colorByNeighbors() {

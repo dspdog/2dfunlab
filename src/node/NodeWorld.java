@@ -18,7 +18,7 @@ public class NodeWorld {
 
     public static float zoom = 1.0f;
     public static float pressure = 0.7550f;
-    public static float temperature = 0.1550f;
+    public static float temperature = 0.01550f;
     public static float distGamma = 2f;
     public static int gravityMode=2;
 
