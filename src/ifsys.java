@@ -249,10 +249,6 @@ public class ifsys extends Panel
             framesThisSecondLogic =0;
         }
 
-        //generatePixels();
-        //rg.drawImage(createImage(new MemoryImageSource(screenwidth, screenheight, pixels, 0, screenwidth)), 0, 0, screenwidth, screenheight, this);
-        //rg.drawImage(sampleImage, getWidth() - 50, 0, 50, 50, this);
-
         rg.setColor(new Color(0.1f,0.1f,0.1f));
         rg.fillRect(0, 0, screenwidth, screenheight);
 
@@ -274,9 +270,12 @@ public class ifsys extends Panel
 
         rg.drawRect(0,0,100,100);
         rg.drawRect(100,100,200,200);
-        rg.drawRect(200,200,300,300);
 
-        drawTree();
+        Shape theShape = new Rectangle2D.Double(0,0,5,50);
+        RandomTransform.setTime();
+        Area theArea = new Area();
+        buildTree(theShape, theArea, 10, RandomTransform.getRandom(new AffineTransform(), 1));
+        rg.draw(theArea);
 
         rg.setColor(Color.red);
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
@@ -284,37 +283,14 @@ public class ifsys extends Panel
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
-    static long startTime = System.currentTimeMillis();
-
-    public void drawTree(){
-        Shape theShape = new Rectangle2D.Double(0,0,5,50);
-        Area theArea = new Area();
-
-        RandomTransform.setTime();
-        AffineTransform at = RandomTransform.getRandom(new AffineTransform(), 1);
-
-        for(int i=0; i<10;i++){
+    public void buildTree(Shape theShape, Area theArea, int depth, AffineTransform at){ //TODO multiple calls for multiple transforms -- use arrayList
+        if(depth>0){
             theArea.add(new Area(RandomTransform.getRandom(at, 1).createTransformedShape(theShape)));
-            //theArea.add(new Area(RandomTransform.getRandom(at, 10).createTransformedShape(theShape)));
             at = RandomTransform.getRandom(at, 1);
-        }
-
-        rg.draw(theArea);
-    }
-
-    public void generatePixels(){
-        double scaler = 255/dataMax;
-        double area = 0;
-        int scaledColor = 0;
-        for(int a = 0; a < screenwidth * screenheight; a++){
-            int argb = 255;
-            scaledColor = (int)(scaler*pixelsData[a]);
-            argb = (argb << 8) + scaledColor;
-            argb = (argb << 8) + scaledColor;
-            argb = (argb << 8) + scaledColor;
-            pixels[a] = argb;
+            buildTree(theShape, theArea, depth - 1, at);
         }
     }
+
 
     public void clearframe(){
         for(int a = 0; a < screenwidth * screenheight; a++){
@@ -325,38 +301,6 @@ public class ifsys extends Panel
         samplesThisFrame=0;
         dataMax = 0;
 
-
-    }
-
-    public boolean putPixel(double x, double y, double alpha){ 
-        double decX, decY; //decimal parts of coordinates
-
-        if(x < (double)(screenwidth - 1) &&
-            y < (double)(screenheight - 1) &&
-            x > 0.0D && y > 0.0D){
-
-            decX = x - Math.floor(x);
-            decY = y - Math.floor(y);
-
-            if(antiAliasing){
-                //each point contributes to 4 pixels
-
-                pixelsData[(int)(x) + (int)(y) * screenwidth]+=alpha*(1.0-decX)*(1.0-decY);
-                pixelsData[(int)(x+1) + (int)(y) * screenwidth]+=alpha*decX*(1.0-decY);
-                pixelsData[(int)(x) + (int)(y+1) * screenwidth]+=alpha*decY*(1.0-decX);
-                pixelsData[(int)(x+1) + (int)(y+1) * screenwidth]+=alpha*decY*decX;
-
-                if(dataMax<pixelsData[(int)x + (int)y * screenwidth]/ zoom){dataMax = pixelsData[(int)x + (int)y * screenwidth]/ zoom;}
-            }else{
-                pixelsData[(int)(x) + (int)(y) * screenwidth]=1;
-            }
-
-            samplesThisFrame++;
-
-            return true; //pixel is in screen bounds
-        }else{
-            return false; //pixel outside of screen bounds
-        }
 
     }
 
@@ -378,15 +322,6 @@ public class ifsys extends Panel
             }
         }catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    public double getSampleValue(double x, double y){ //TODO bilinear filtering
-        int index = (int)x+sampleWidth*(int)y;
-        if(index < sampleWidth*sampleHeight && index>0){
-            return samplePixels[(int)x + (int)y*sampleWidth] / 255.0;
-        }else{
-            return 0;
         }
     }
 
