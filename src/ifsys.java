@@ -7,14 +7,19 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class ifsys extends Panel
     implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, ActionListener,
         ItemListener
 {
 
+    public static ArrayList<AffineTransform> trans;
+    public static Area theArea;
+    public static Shape theShape;
+
     Point2D realMousePt;
-    Point2D centerPt = new Point2D.Double(512,512);
+    Point2D centerPt = new Point2D.Double(0,0);
 
     final mainthread game;
     boolean quit;
@@ -271,16 +276,17 @@ public class ifsys extends Panel
         rg.drawRect(0,0,100,100);
         rg.drawRect(100,100,200,200);
 
-        Shape theShape = new Rectangle2D.Double(-20,-20,40,40);
         MyTransformUtils.setTime();
-        Area theArea = new Area();
+        theArea = new Area();
+        theShape = new Rectangle.Double(-20,-20,40,40);
 
-        AffineTransform at1 = MyTransformUtils.getRandom(new AffineTransform(), 1);
-        AffineTransform at2 = MyTransformUtils.getRandom(new AffineTransform(), 20);
-        AffineTransform at3 = MyTransformUtils.getRandom(new AffineTransform(), 30);
+        trans = new ArrayList<AffineTransform>();
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 10));
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 100));
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 30));
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 0));
 
-        buildTree(theShape, theArea, 5, at1, at2,at3, new AffineTransform());
-
+        buildTree(4, new AffineTransform()); //TODO move this to another thread!
 
         rg.draw(theArea);
 
@@ -290,12 +296,11 @@ public class ifsys extends Panel
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
-    public void buildTree(Shape theShape, Area theArea, int depth, AffineTransform at, AffineTransform at2, AffineTransform at3, AffineTransform atAccum){ //TODO multiple calls for multiple transforms -- use arrayList
-        if(depth>0){
-            theArea.add(new Area(atAccum.createTransformedShape(theShape)));
-            buildTree(theShape, theArea, depth - 1, at, at2, at3, MyTransformUtils.compose(new AffineTransform(atAccum), at));
-            buildTree(theShape, theArea, depth - 1, at, at2, at3, MyTransformUtils.compose(new AffineTransform(atAccum), at2));
-            buildTree(theShape, theArea, depth - 1, at, at2, at3, MyTransformUtils.compose(new AffineTransform(atAccum), at3));
+    public void buildTree(int depth, AffineTransform atAccum){
+        theArea.add(new Area(atAccum.createTransformedShape(theShape)));
+        if(depth > 0 )
+        for(AffineTransform tran : trans){
+            buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran));
         }
     }
 
