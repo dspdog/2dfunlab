@@ -37,7 +37,7 @@ public class MyTransformUtils {
         float noise5 = (float) SimplexNoise.noise(seed*10, (seed*35000 + theTime - startTime) / 10000f, 50f*seed) ;
 
         at2.translate(noise0*40, noise1*40);
-        at2.scale(noise2/10+0.5, noise3/10+0.5);
+        at2.scale(noise2/3+0.5, noise3/3+0.5);
         at2.shear(noise4, noise5);
         //at2.rotate(noise0 * Math.PI);
 

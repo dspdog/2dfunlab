@@ -199,7 +199,9 @@ public class ifsys extends Panel
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = new Rectangle.Float(-20,-20,40,40); //TODO circle w/ quality factor 
+        theShape = new Rectangle.Float(-20,-20,40,40); //TODO circle w/ quality factor
+
+        //Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         trans = new ArrayList<AffineTransform>();
         trans.add(MyTransformUtils.getRandom(new AffineTransform(), 10));
@@ -207,9 +209,10 @@ public class ifsys extends Panel
         trans.add(MyTransformUtils.getRandom(new AffineTransform(), 30));
         trans.add(MyTransformUtils.getRandom(new AffineTransform(), 0));
 
-        buildTree(5, new AffineTransform());
-        theArea.add(theSubArea);
-        theAreaDrawn=theArea;
+        theArea = buildTree(4, new AffineTransform(), theShape);
+        //Area subtractArea = buildTree(4, new AffineTransform(), subtract);
+        //theArea.subtract(subtractArea);
+        theAreaDrawn= theArea;
     }
 
     public class mainthread extends Thread{
@@ -326,18 +329,18 @@ public class ifsys extends Panel
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
-    static public long subAreaCount=0;
-
-    public void buildTree(int depth, AffineTransform atAccum){
+    public Area buildTree(int depth, AffineTransform atAccum, Shape _theShape){
         //TODO depth per-transform
-        //TODO return Area obj --> make Areas "bubble up" ?
-        subAreaCount++;
-        theSubArea.add(new Area(atAccum.createTransformedShape(theShape)));
-        if(subAreaCount%100==0){theArea.add(theSubArea); theSubArea = new Area(); subAreaCount=0;} //adding to area is "expensive" opp
+        //TODO check for islands w/ Area.isSingular()
+
+        Area result = new Area(atAccum.createTransformedShape(_theShape));
+
         if(depth > 0 )
         for(AffineTransform tran : trans){
-            buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran));
+            result.add(buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran),_theShape));
         }
+
+        return result;
     }
 
     public void clearframe(){
