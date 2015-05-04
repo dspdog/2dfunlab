@@ -271,10 +271,17 @@ public class ifsys extends Panel
         rg.drawRect(0,0,100,100);
         rg.drawRect(100,100,200,200);
 
-        Shape theShape = new Rectangle2D.Double(0,0,5,50);
-        RandomTransform.setTime();
+        Shape theShape = new Rectangle2D.Double(-20,-20,40,40);
+        MyTransformUtils.setTime();
         Area theArea = new Area();
-        buildTree(theShape, theArea, 100, RandomTransform.getRandom(new AffineTransform(), 1));
+
+        AffineTransform at1 = MyTransformUtils.getRandom(new AffineTransform(), 1);
+        AffineTransform at2 = MyTransformUtils.getRandom(new AffineTransform(), 20);
+        AffineTransform at3 = MyTransformUtils.getRandom(new AffineTransform(), 30);
+
+        buildTree(theShape, theArea, 5, at1, at2,at3, new AffineTransform());
+
+
         rg.draw(theArea);
 
         rg.setColor(Color.red);
@@ -283,11 +290,12 @@ public class ifsys extends Panel
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
-    public void buildTree(Shape theShape, Area theArea, int depth, AffineTransform at){ //TODO multiple calls for multiple transforms -- use arrayList
+    public void buildTree(Shape theShape, Area theArea, int depth, AffineTransform at, AffineTransform at2, AffineTransform at3, AffineTransform atAccum){ //TODO multiple calls for multiple transforms -- use arrayList
         if(depth>0){
-            theArea.add(new Area(RandomTransform.getRandom(at, 1).createTransformedShape(theShape)));
-            at = RandomTransform.getRandom(at, 1); //TODO make generic "compose-able" transform
-            buildTree(theShape, theArea, depth - 1, at);
+            theArea.add(new Area(atAccum.createTransformedShape(theShape)));
+            buildTree(theShape, theArea, depth - 1, at, at2, at3, MyTransformUtils.compose(new AffineTransform(atAccum), at));
+            buildTree(theShape, theArea, depth - 1, at, at2, at3, MyTransformUtils.compose(new AffineTransform(atAccum), at2));
+            buildTree(theShape, theArea, depth - 1, at, at2, at3, MyTransformUtils.compose(new AffineTransform(atAccum), at3));
         }
     }
 
