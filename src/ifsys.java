@@ -3,9 +3,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.net.URL;
@@ -264,6 +262,8 @@ public class ifsys extends Panel
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
 
+        //centerPt.setLocation(realMousePt);
+
         cameraTransform = new AffineTransform();
         cameraTransform.translate(screenwidth/2,screenheight/2);
         cameraTransform.scale(zoom, zoom);
@@ -276,10 +276,30 @@ public class ifsys extends Panel
         rg.drawRect(100,100,200,200);
         rg.drawRect(200,200,300,300);
 
+        drawTree();
+
         rg.setColor(Color.red);
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
 
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
+    }
+
+    static long startTime = System.currentTimeMillis();
+
+    public void drawTree(){
+        Shape theShape = new Rectangle2D.Double(0,0,5,50);
+        Area theArea = new Area();
+
+        RandomTransform.setTime();
+        AffineTransform at = RandomTransform.getRandom(new AffineTransform(), 1);
+
+        for(int i=0; i<10;i++){
+            theArea.add(new Area(RandomTransform.getRandom(at, 1).createTransformedShape(theShape)));
+            //theArea.add(new Area(RandomTransform.getRandom(at, 10).createTransformedShape(theShape)));
+            at = RandomTransform.getRandom(at, 1);
+        }
+
+        rg.draw(theArea);
     }
 
     public void generatePixels(){
