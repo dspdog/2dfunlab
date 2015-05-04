@@ -274,7 +274,7 @@ public class ifsys extends Panel
         Shape theShape = new Rectangle2D.Double(0,0,5,50);
         RandomTransform.setTime();
         Area theArea = new Area();
-        buildTree(theShape, theArea, 10, RandomTransform.getRandom(new AffineTransform(), 1));
+        buildTree(theShape, theArea, 100, RandomTransform.getRandom(new AffineTransform(), 1));
         rg.draw(theArea);
 
         rg.setColor(Color.red);
@@ -286,7 +286,7 @@ public class ifsys extends Panel
     public void buildTree(Shape theShape, Area theArea, int depth, AffineTransform at){ //TODO multiple calls for multiple transforms -- use arrayList
         if(depth>0){
             theArea.add(new Area(RandomTransform.getRandom(at, 1).createTransformedShape(theShape)));
-            at = RandomTransform.getRandom(at, 1);
+            at = RandomTransform.getRandom(at, 1); //TODO make generic "compose-able" transform
             buildTree(theShape, theArea, depth - 1, at);
         }
     }
