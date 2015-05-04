@@ -15,13 +15,16 @@ public class ifsys extends Panel
 {
 
     public static ArrayList<AffineTransform> trans;
+    public static Area theSubArea;
     public static Area theArea;
+    public static Area theAreaDrawn;
     public static Shape theShape;
 
     Point2D realMousePt;
     Point2D centerPt = new Point2D.Double(0,0);
 
     final mainthread game;
+    final mainthread2 treeThread;
     boolean quit;
     final int screenwidth;
     final int screenheight;
@@ -104,6 +107,7 @@ public class ifsys extends Panel
         ctrlDown=false;
         shiftDown=false;
         game = new mainthread();
+        treeThread = new mainthread2();
         quit = false;
         antiAliasing = true;
         infoHidden = false;
@@ -191,11 +195,27 @@ public class ifsys extends Panel
             }
     }
 
+    public void updateTree(){
+        MyTransformUtils.setTime();
+        theArea = new Area();
+        theSubArea = new Area();
+        theShape = new Rectangle.Float(-20,-20,40,40); //TODO circle w/ quality factor 
+
+        trans = new ArrayList<AffineTransform>();
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 10));
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 100));
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 30));
+        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 0));
+
+        buildTree(5, new AffineTransform());
+        theArea.add(theSubArea);
+        theAreaDrawn=theArea;
+    }
 
     public class mainthread extends Thread{
         public void run(){
             while(!quit){
-                framesThisSecondLogic++;
+                //framesThisSecondLogic++;
                 Point2D mousePt = new Point2D.Float(mousex,mousey);
                 Point2D _mousePt = new Point2D.Float(mousex,mousey);
 
@@ -218,6 +238,24 @@ public class ifsys extends Panel
         }
     }
 
+
+    public class mainthread2 extends Thread{
+        public void run(){
+            while(!quit){
+                framesThisSecondLogic++;
+                updateTree();
+                try {
+                    sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public mainthread2(){
+        }
+    }
+
     public void start(){
         //setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         addMouseListener(this);
@@ -228,7 +266,9 @@ public class ifsys extends Panel
         rg = (Graphics2D)render.getGraphics();
 
         clearframe();
+        treeThread.start();
         game.start();
+
 
         setSampleImg("meerkat.jpg");
         started = true;
@@ -244,6 +284,8 @@ public class ifsys extends Panel
 
     public void paint(Graphics2D gr){
         rg = (Graphics2D)render.getGraphics();
+
+        rg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         framesThisSecondDrawn++;
         if(System.currentTimeMillis()- oneSecondAgo >=1000){
@@ -276,19 +318,7 @@ public class ifsys extends Panel
         rg.drawRect(0,0,100,100);
         rg.drawRect(100,100,200,200);
 
-        MyTransformUtils.setTime();
-        theArea = new Area();
-        theShape = new Rectangle.Double(-20,-20,40,40);
-
-        trans = new ArrayList<AffineTransform>();
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 10));
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 100));
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 30));
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 0));
-
-        buildTree(4, new AffineTransform()); //TODO move this to another thread!
-
-        rg.draw(theArea);
+        rg.draw(theAreaDrawn);
 
         rg.setColor(Color.red);
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
@@ -296,14 +326,19 @@ public class ifsys extends Panel
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
+    static public long subAreaCount=0;
+
     public void buildTree(int depth, AffineTransform atAccum){
-        theArea.add(new Area(atAccum.createTransformedShape(theShape)));
+        //TODO depth per-transform
+        //TODO return Area obj --> make Areas "bubble up" ?
+        subAreaCount++;
+        theSubArea.add(new Area(atAccum.createTransformedShape(theShape)));
+        if(subAreaCount%100==0){theArea.add(theSubArea); theSubArea = new Area(); subAreaCount=0;} //adding to area is "expensive" opp
         if(depth > 0 )
         for(AffineTransform tran : trans){
             buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran));
         }
     }
-
 
     public void clearframe(){
         for(int a = 0; a < screenwidth * screenheight; a++){
@@ -354,6 +389,7 @@ public class ifsys extends Panel
     }
 
     public void mousePressed(MouseEvent e){
+
         mousemode = e.getButton();
 
         mousex = e.getX();
@@ -404,6 +440,7 @@ public class ifsys extends Panel
 
         clearframe();
 
+
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
@@ -436,8 +473,8 @@ public class ifsys extends Panel
 
     public void mouseMoved(MouseEvent e){
         findSelectedPoint();
-        mousex = e.getX();
-        mousey = e.getY();
+        //mousex = e.getX();
+        //mousey = e.getY();
     }
 
     public void keyTyped(KeyEvent e){

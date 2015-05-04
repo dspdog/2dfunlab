@@ -7,7 +7,7 @@ import java.awt.geom.Area;
 public class MyTransformUtils {
 
     static long startTime = System.currentTimeMillis();
-    static long theTime = 0;
+    static long theTime = System.currentTimeMillis();
 
     static void setTime(){
         theTime = System.currentTimeMillis();
