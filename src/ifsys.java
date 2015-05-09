@@ -199,9 +199,9 @@ public class ifsys extends Panel
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = new Rectangle.Float(-20,-20,40,40); //TODO circle w/ quality factor
+        theShape = MyPolygonUtils.NGon(8);
 
-        //Shape subtract = new Rectangle.Float(-10,-10,20,40);
+        Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         trans = new ArrayList<AffineTransform>();
         trans.add(MyTransformUtils.getRandom(new AffineTransform(), 10));
