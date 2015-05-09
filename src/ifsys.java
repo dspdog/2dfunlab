@@ -209,7 +209,7 @@ public class ifsys extends Panel
         trans.add(MyTransformUtils.getRandom(new AffineTransform(), 30));
         trans.add(MyTransformUtils.getRandom(new AffineTransform(), 0));
 
-        theArea = buildTree(4, new AffineTransform(), theShape);
+        theArea = buildTree(5, new AffineTransform(), theShape);
         //Area subtractArea = buildTree(4, new AffineTransform(), subtract);
         //theArea.subtract(subtractArea);
         theAreaDrawn= theArea;
