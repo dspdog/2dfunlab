@@ -20,28 +20,34 @@ public class MyTransformUtils {
         return src;
     }
 
-    static AffineTransform getRandom(AffineTransform at, int seed) {
+    static AffineTransform getRandomSmall() {
 
-        AffineTransform at2 = new AffineTransform(at);
+        float size = 0.01f;
 
-        //translate
-        float noise0 = (float) SimplexNoise.noise(seed*5, (seed*10000 + theTime - startTime) / 10000f, 0f);
-        float noise1 = (float) SimplexNoise.noise(seed*6, (seed*20000 + theTime - startTime) / 10000f, 10f*seed) ;
+        float scaleX =(float)(Math.random()-0.5f)*size+1f;
+        float scaleY =(float)(Math.random()-0.5f)*size+1f;
 
-        //scale
-        float noise2 = (float) SimplexNoise.noise(seed*7, (seed*30000 + theTime - startTime) / 10000f, 20f*seed) ;
-        float noise3 = (float) SimplexNoise.noise(seed*8, (seed*40000 + theTime - startTime) / 10000f, 30f*seed) ;
+        float shearX =(float)(Math.random()-0.5f)*size;
+        float shearY =(float)(Math.random()-0.5f)*size;
 
-        //shear
-        float noise4 = (float) SimplexNoise.noise(seed*9, (0 + theTime - startTime) / 10000f, 40f*seed) ;
-        float noise5 = (float) SimplexNoise.noise(seed*10, (seed*35000 + theTime - startTime) / 10000f, 50f*seed) ;
+        float translateX =(float)(Math.random()-0.5f)*size;
+        float translateY =(float)(Math.random()-0.5f)*size;
 
-        at2.translate(noise0*40, noise1*40);
-        at2.scale(noise2/3+0.5, noise3/3+0.5);
-        at2.shear(noise4, noise5);
-        //at2.rotate(noise0 * Math.PI);
+        return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
+    }
 
-        return at2;
+    static AffineTransform getRandom() {
+
+        float scaleX =(float)Math.random()*0.5f+ 0.3f;
+        float scaleY =(float)Math.random()*0.5f+ 0.3f;
+
+        float shearX =(float)(Math.random()-0.5f)*1.5f;
+        float shearY =(float)(Math.random()-0.5f)*1.5f;
+
+        float translateX =(float)(Math.random()-0.5f)*75f;
+        float translateY =(float)(Math.random()-0.5f)*75f;
+
+        return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }
 
 

@@ -196,20 +196,31 @@ public class ifsys extends Panel
     }
 
     public void updateTree(){
+
+        //TODO reset shape every few seconds
+
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(8);
+        theShape = MyPolygonUtils.NGon(17);
 
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
-        trans = new ArrayList<AffineTransform>();
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 10));
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 100));
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 30));
-        trans.add(MyTransformUtils.getRandom(new AffineTransform(), 0));
+        if(trans==null){
+            trans = new ArrayList<AffineTransform>();
+            trans.add(MyTransformUtils.getRandom());
+            trans.add(MyTransformUtils.getRandom());
+            trans.add(MyTransformUtils.getRandom());
+            trans.add(MyTransformUtils.getRandom());
+        }else{
+            for(AffineTransform tran : trans){
+                //TODO try like 12 different alternatives before iterating onto the next one
+                MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall());
+            }
+        }
 
-        theArea = buildTree(5, new AffineTransform(), theShape);
+
+        theArea = buildTree(4, new AffineTransform(), theShape);
         //Area subtractArea = buildTree(4, new AffineTransform(), subtract);
         //theArea.subtract(subtractArea);
         theAreaDrawn= theArea;
@@ -321,6 +332,7 @@ public class ifsys extends Panel
         rg.drawRect(0,0,100,100);
         rg.drawRect(100,100,200,200);
 
+        if(theAreaDrawn!=null)
         rg.draw(theAreaDrawn);
 
         rg.setColor(Color.red);
@@ -499,6 +511,7 @@ public class ifsys extends Panel
         if(e.getKeyChar() == 's'){
             centerPt.setLocation(centerPt.getX(),centerPt.getY()+10);
         }
+
         clearframe();
 
 
