@@ -8,6 +8,15 @@ import java.util.ArrayList;
  * Created by user on 5/9/2015.
  */
 public class MyAreaUtils {
+
+    static double getAreaPerimeter(Area area){
+        return polygonPerimeter(getAreaSegments(area));
+    }
+
+    static double getAreaArea(Area area){
+        return polygonArea(getAreaSegments(area));
+    }
+
     //http://stackoverflow.com/questions/8144156/using-pathiterator-to-return-all-line-segments-that-constrain-an-area
     static public ArrayList<Line2D.Double> getAreaSegments(Area area){
         ArrayList<double[]> areaPoints = new ArrayList<double[]>();
@@ -60,13 +69,13 @@ public class MyAreaUtils {
         return areaSegments;
     }
 
-    public static double PolygonArea(ArrayList<Line2D.Double> areaSegments) { //http://www.shodor.org/~jmorrell/interactivate/org/shodor/util11/PolygonUtils.java
+    public static double polygonArea(ArrayList<Line2D.Double> areaSegments) { //http://www.shodor.org/~jmorrell/interactivate/org/shodor/util11/PolygonUtils.java
         double area = 0;
         for (Line2D segment : areaSegments) {area += segment.getP1().getX() * segment.getP2().getY() - segment.getP1().getY() * segment.getP2().getX();}
         return (Math.abs(area/2d));
     }
 
-    public static double PolygonPerimeter(ArrayList<Line2D.Double> areaSegments) {
+    public static double polygonPerimeter(ArrayList<Line2D.Double> areaSegments) {
         double perim = 0;
         for (Line2D segment : areaSegments) {perim+=Math.hypot(segment.getX2()-segment.getX1(), segment.getY2()-segment.getY1());}
         return perim;

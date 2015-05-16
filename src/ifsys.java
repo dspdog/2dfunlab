@@ -14,7 +14,13 @@ public class ifsys extends Panel
         ItemListener
 {
 
+
+    static double highestScore = 0;
+
+
     public static ArrayList<AffineTransform> trans;
+    public static ArrayList<AffineTransform> recordTrans;
+
     public static Area theSubArea;
     public static Area theArea;
     public static Area theAreaDrawn;
@@ -195,6 +201,10 @@ public class ifsys extends Panel
             }
     }
 
+    static int attempts = 0;
+    static int generations = 0;
+    static int evolves = 0;
+
     public void updateTree(){
 
         //TODO reset shape every few seconds
@@ -214,13 +224,28 @@ public class ifsys extends Panel
             trans.add(MyTransformUtils.getRandom());
         }else{
             for(AffineTransform tran : trans){
-                //TODO try like 12 different alternatives before iterating onto the next one
                 MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall());
             }
         }
 
-
         theArea = buildTree(4, new AffineTransform(), theShape);
+
+        double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
+
+        if(score>highestScore){
+            highestScore=score;
+            recordTrans = (ArrayList<AffineTransform>)trans.clone();
+            evolves++;
+            System.out.println("SCORE: " + highestScore + ", " + attempts + " attempts, " + evolves + " evolutions, "  + generations + " generations" );
+            attempts=0;
+        }else{
+            trans = (ArrayList<AffineTransform>)recordTrans.clone();
+            attempts++;
+        }
+        generations++;
+
+        //System.out.println("Perim/Area = " + MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea));
+
         //Area subtractArea = buildTree(4, new AffineTransform(), subtract);
         //theArea.subtract(subtractArea);
         theAreaDrawn= theArea;
