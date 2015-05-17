@@ -213,27 +213,27 @@ public class ifsys extends Panel
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(37);
+        theShape = MyPolygonUtils.NGon(197);
 
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
-        float rndScale = 0.0001f;
+        float intervalSec = 10f;
+        float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+
+        int numberOfTransforms = 4; // = number of control points/ affines tranforms to choose from
 
         if(trans==null){
             trans = new ArrayList<AffineTransform>();
-            trans.add(MyTransformUtils.getRandomSmall(rndScale));
-            trans.add(MyTransformUtils.getRandomSmall(rndScale));
-            trans.add(MyTransformUtils.getRandomSmall(rndScale));
-            trans.add(MyTransformUtils.getRandomSmall(rndScale));
-        }else{
-            for(AffineTransform tran : trans){
-                MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //TODO fluctuate "temperature"
-            }
+            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(rndScale));
+        }
+
+        for(AffineTransform tran : trans){
+            MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
         }
 
         theArea = buildTree(4, new AffineTransform(), theShape);
 
-        double targetArea = 1500d;
+        double targetArea = 15000d;
         double startArea = MyAreaUtils.getAreaArea(theArea);
 
         theArea.transform(AffineTransform.getScaleInstance(Math.sqrt(targetArea/startArea),Math.sqrt(targetArea/startArea)));
@@ -241,9 +241,7 @@ public class ifsys extends Panel
         double enclosedArea = MyAreaUtils.getAreaArea(theArea);
         double perim = MyAreaUtils.getAreaPerimeter(theArea);
 
-
         double score = perim / enclosedArea;
-        //System.out.println(theArea.isSingular());
 
         if(score>highestScore){
 
@@ -251,19 +249,22 @@ public class ifsys extends Panel
             //TODO save area/transforms to list, show "replay"
 
             highestScore=score;
-            recordTrans = (ArrayList<AffineTransform>)trans.clone();
+            recordTrans = (ArrayList<AffineTransform>)trans.clone(); //TODO actually clone the members too not just the list
             evolves++;
             System.out.println(
                     "SCORE: " +String.format("%1$.4f", highestScore) + ", "
-                    + attempts + " attempts, " + evolves + " evolutions, "
-                    + generations + " gens, " + (generations/evolves)
-                    + " g/e cont: " + theArea.isSingular() + " area: "
-                    + String.format("%1$.2f", enclosedArea) + " (" + String.format("%1$.2f", startArea) + ") perim: " + String.format("%1$.2f", perim) );
+                            + attempts + " attempts, " + evolves + " evolutions, "
+                            + generations + " gens, " + (generations/evolves)
+                            + " g/e cont: " + theArea.isSingular() + " area: "
+                            + String.format("%1$.2f", enclosedArea) + " (" + String.format("%1$.2f", startArea) + ") perim: " + String.format("%1$.2f", perim) );
             attempts=0;
         }else{
             trans = (ArrayList<AffineTransform>)recordTrans.clone();
             attempts++;
         }
+
+
+
         generations++;
 
         //System.out.println("Perim/Area = " + MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea));

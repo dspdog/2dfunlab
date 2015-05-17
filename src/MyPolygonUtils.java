@@ -5,7 +5,7 @@ import java.awt.*;
  */
 public class MyPolygonUtils {
     public static Shape NGon(int N){ //http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawaPolygon.htm
-        float radius = 20;
+        float radius = 2000;
         float x = 0;
         float y = 0;
         Polygon p = new Polygon();
