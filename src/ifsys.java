@@ -220,9 +220,9 @@ public class ifsys extends Panel
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         float intervalSec = 10f;
-        //float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+        float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
 
-        float rndScale = 0.01f;
+        //float rndScale = 0.01f;
 
         int numberOfTransforms = 3; // = number of control points/ affines tranforms to choose from
 
