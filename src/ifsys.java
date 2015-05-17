@@ -224,7 +224,7 @@ public class ifsys extends Panel
 
         float rndScale = 0.01f;
 
-        int numberOfTransforms = 4; // = number of control points/ affines tranforms to choose from
+        int numberOfTransforms = 3; // = number of control points/ affines tranforms to choose from
 
         if(trans==null || resetShape){
             resetShape=false;
@@ -259,7 +259,7 @@ public class ifsys extends Panel
             recordTrans = cloneList(trans); //TODO actually clone the members too not just the list
             evolves++;
             System.out.println(
-                    "SCORE: " +String.format("%1$.4f", highestScore) + ", "
+                    "SCORE: " +String.format("%1$.12f", highestScore) + ", "
                             + attempts + " attempts, " + evolves + " evolutions, "
                             + generations + " gens, " + (generations/evolves)
                             + " g/e cont: " + theArea.isSingular() + " area: "

@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +11,8 @@ import java.util.ArrayList;
 public class MyAreaUtils {
 
     static double getAreaPerimeter(Area area){
-        return polygonPerimeter(getAreaSegments(area));
+        if(area.getBounds2D().getWidth()>500 || area.getBounds2D().getHeight()>500 || !area.isSingular())return 0;
+        return polygonPerimeter(getAreaSegments(area)); //TODO switch back to weighted?
     }
 
     static double getAreaArea(Area area){
@@ -78,6 +80,19 @@ public class MyAreaUtils {
     public static double polygonPerimeter(ArrayList<Line2D.Double> areaSegments) {
         double perim = 0;
         for (Line2D segment : areaSegments) {perim+=Math.hypot(segment.getX2()-segment.getX1(), segment.getY2()-segment.getY1());}
+        return perim;
+    }
+
+    public static double polygonPerimeterWeighted(ArrayList<Line2D.Double> areaSegments, Rectangle2D bounds) {
+        double perim = 0;
+
+        for (Line2D segment : areaSegments) {
+            double distToCenter1 = Math.hypot(segment.getX1(), segment.getY1());//centered at origin instead of bounds
+            double distToCenter2 = Math.hypot(segment.getX2(), segment.getY2());
+            double weight1 = 1d/(distToCenter1*distToCenter1);
+            double weight2 = 1d/(distToCenter2*distToCenter2);
+            perim+=Math.min(weight1,weight2)*Math.hypot(segment.getX2()-segment.getX1(), segment.getY2()-segment.getY1());
+        }
         return perim;
     }
 }
