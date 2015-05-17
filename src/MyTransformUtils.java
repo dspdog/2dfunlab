@@ -1,5 +1,6 @@
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.util.Random;
 
 /**
  * Created by user on 5/3/2015.
@@ -20,18 +21,18 @@ public class MyTransformUtils {
         return src;
     }
 
-    static AffineTransform getRandomSmall() {
+    static Random rnd = new Random();
 
-        float size = 0.01f;
+    static AffineTransform getRandomSmall(float size) {
 
-        float scaleX =(float)(Math.random()-0.5f)*size+1f;
-        float scaleY =(float)(Math.random()-0.5f)*size+1f;
+        float scaleX =(float)(rnd.nextGaussian())*size+1f;
+        float scaleY =(float)(rnd.nextGaussian())*size+1f;
 
-        float shearX =(float)(Math.random()-0.5f)*size;
-        float shearY =(float)(Math.random()-0.5f)*size;
+        float shearX =(float)(rnd.nextGaussian())*size;
+        float shearY =(float)(rnd.nextGaussian())*size;
 
-        float translateX =(float)(Math.random()-0.5f)*size;
-        float translateY =(float)(Math.random()-0.5f)*size;
+        float translateX =(float)(rnd.nextGaussian())*size;
+        float translateY =(float)(rnd.nextGaussian())*size;
 
         return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }

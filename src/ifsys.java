@@ -204,6 +204,7 @@ public class ifsys extends Panel
     static int attempts = 0;
     static int generations = 0;
     static int evolves = 0;
+    static boolean resetShape = true;
 
     public void updateTree(){
 
@@ -216,30 +217,40 @@ public class ifsys extends Panel
 
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
+        float rndScale = 0.01f;
+
         if(trans==null){
             trans = new ArrayList<AffineTransform>();
-            trans.add(MyTransformUtils.getRandom());
-            trans.add(MyTransformUtils.getRandom());
-            trans.add(MyTransformUtils.getRandom());
-            trans.add(MyTransformUtils.getRandom());
+            trans.add(MyTransformUtils.getRandomSmall(rndScale));
+            trans.add(MyTransformUtils.getRandomSmall(rndScale));
+            trans.add(MyTransformUtils.getRandomSmall(rndScale));
+            trans.add(MyTransformUtils.getRandomSmall(rndScale));
         }else{
             for(AffineTransform tran : trans){
-                MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall());
+                MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //TODO fluctuate "temperature"
             }
         }
 
         theArea = buildTree(4, new AffineTransform(), theShape);
 
         double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
+        //System.out.println(theArea.isSingular());
 
         if(score>highestScore){
+
+            //TODO take picture
+            //TODO save area/transforms to list, show "replay"
+
             highestScore=score;
             recordTrans = (ArrayList<AffineTransform>)trans.clone();
             evolves++;
-            System.out.println("SCORE: " + highestScore + ", " + attempts + " attempts, " + evolves + " evolutions, "  + generations + " generations" );
+            System.out.println("SCORE: " + highestScore + ", " + attempts + " attempts, " + evolves + " evolutions, "  + generations + " generations, " + (generations/evolves) + " g/e cont: " + theArea.isSingular() );
             attempts=0;
         }else{
-            trans = (ArrayList<AffineTransform>)recordTrans.clone();
+
+            if(recordTrans!=null){
+                trans = (ArrayList<AffineTransform>)recordTrans.clone();
+            }
             attempts++;
         }
         generations++;
