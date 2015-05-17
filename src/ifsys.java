@@ -231,9 +231,17 @@ public class ifsys extends Panel
             }
         }
 
-        theArea = buildTree(4, new AffineTransform(), theShape);
+        theArea = buildTree(5, new AffineTransform(), theShape);
 
-        double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
+        double startArea = MyAreaUtils.getAreaArea(theArea);
+
+        theArea.transform(AffineTransform.getScaleInstance(Math.sqrt(1500d/startArea),Math.sqrt(1500d/startArea)));
+
+        double enclosedArea = MyAreaUtils.getAreaArea(theArea);
+        double perim = MyAreaUtils.getAreaPerimeter(theArea);
+
+
+        double score = perim / enclosedArea;
         //System.out.println(theArea.isSingular());
 
         if(score>highestScore){
@@ -241,10 +249,17 @@ public class ifsys extends Panel
             //TODO take picture
             //TODO save area/transforms to list, show "replay"
 
+            //TODO scale down so that area is constant
+
             highestScore=score;
             recordTrans = (ArrayList<AffineTransform>)trans.clone();
             evolves++;
-            System.out.println("SCORE: " + highestScore + ", " + attempts + " attempts, " + evolves + " evolutions, "  + generations + " generations, " + (generations/evolves) + " g/e cont: " + theArea.isSingular() );
+            System.out.println(
+                    "SCORE: " +String.format("%1$.4f", highestScore) + ", "
+                    + attempts + " attempts, " + evolves + " evolutions, "
+                    + generations + " generations, " + (generations/evolves)
+                    + " g/e cont: " + theArea.isSingular() + " area: "
+                    + String.format("%1$.2f", enclosedArea) + " oldArea: " + String.format("%1$.2f", startArea) + " perim: " + String.format("%1$.2f", perim) );
             attempts=0;
         }else{
 
