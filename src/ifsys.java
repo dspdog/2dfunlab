@@ -213,11 +213,11 @@ public class ifsys extends Panel
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(17);
+        theShape = MyPolygonUtils.NGon(37);
 
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
-        float rndScale = 0.01f;
+        float rndScale = 0.0001f;
 
         if(trans==null){
             trans = new ArrayList<AffineTransform>();
@@ -231,11 +231,12 @@ public class ifsys extends Panel
             }
         }
 
-        theArea = buildTree(5, new AffineTransform(), theShape);
+        theArea = buildTree(4, new AffineTransform(), theShape);
 
+        double targetArea = 1500d;
         double startArea = MyAreaUtils.getAreaArea(theArea);
 
-        theArea.transform(AffineTransform.getScaleInstance(Math.sqrt(1500d/startArea),Math.sqrt(1500d/startArea)));
+        theArea.transform(AffineTransform.getScaleInstance(Math.sqrt(targetArea/startArea),Math.sqrt(targetArea/startArea)));
 
         double enclosedArea = MyAreaUtils.getAreaArea(theArea);
         double perim = MyAreaUtils.getAreaPerimeter(theArea);
@@ -249,23 +250,18 @@ public class ifsys extends Panel
             //TODO take picture
             //TODO save area/transforms to list, show "replay"
 
-            //TODO scale down so that area is constant
-
             highestScore=score;
             recordTrans = (ArrayList<AffineTransform>)trans.clone();
             evolves++;
             System.out.println(
                     "SCORE: " +String.format("%1$.4f", highestScore) + ", "
                     + attempts + " attempts, " + evolves + " evolutions, "
-                    + generations + " generations, " + (generations/evolves)
+                    + generations + " gens, " + (generations/evolves)
                     + " g/e cont: " + theArea.isSingular() + " area: "
-                    + String.format("%1$.2f", enclosedArea) + " oldArea: " + String.format("%1$.2f", startArea) + " perim: " + String.format("%1$.2f", perim) );
+                    + String.format("%1$.2f", enclosedArea) + " (" + String.format("%1$.2f", startArea) + ") perim: " + String.format("%1$.2f", perim) );
             attempts=0;
         }else{
-
-            if(recordTrans!=null){
-                trans = (ArrayList<AffineTransform>)recordTrans.clone();
-            }
+            trans = (ArrayList<AffineTransform>)recordTrans.clone();
             attempts++;
         }
         generations++;
