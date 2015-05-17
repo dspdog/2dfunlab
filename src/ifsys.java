@@ -206,6 +206,8 @@ public class ifsys extends Panel
     static int evolves = 0;
     static boolean resetShape = true;
 
+    static float polarity = 1.0f;
+
     public void updateTree(){
 
         //TODO reset shape every few seconds
@@ -213,18 +215,23 @@ public class ifsys extends Panel
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(197);
+        theShape = MyPolygonUtils.NGon(27);
 
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         float intervalSec = 10f;
-        float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+        //float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+
+        float rndScale = 0.01f;
 
         int numberOfTransforms = 4; // = number of control points/ affines tranforms to choose from
 
-        if(trans==null){
+        if(trans==null || resetShape){
+            resetShape=false;
+            highestScore=0;
+            recordTrans = new ArrayList<AffineTransform>();
             trans = new ArrayList<AffineTransform>();
-            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(rndScale));
+            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(rndScale)); //use getRandom for more random pts
         }
 
         for(AffineTransform tran : trans){
@@ -243,13 +250,13 @@ public class ifsys extends Panel
 
         double score = perim / enclosedArea;
 
-        if(score>highestScore){
+        if(score*polarity>=highestScore*polarity){
 
             //TODO take picture
             //TODO save area/transforms to list, show "replay"
 
             highestScore=score;
-            recordTrans = (ArrayList<AffineTransform>)trans.clone(); //TODO actually clone the members too not just the list
+            recordTrans = cloneList(trans); //TODO actually clone the members too not just the list
             evolves++;
             System.out.println(
                     "SCORE: " +String.format("%1$.4f", highestScore) + ", "
@@ -259,7 +266,8 @@ public class ifsys extends Panel
                             + String.format("%1$.2f", enclosedArea) + " (" + String.format("%1$.2f", startArea) + ") perim: " + String.format("%1$.2f", perim) );
             attempts=0;
         }else{
-            trans = (ArrayList<AffineTransform>)recordTrans.clone();
+            if(recordTrans!=null)
+            trans =cloneList(recordTrans);
             attempts++;
         }
 
@@ -272,6 +280,14 @@ public class ifsys extends Panel
         //Area subtractArea = buildTree(4, new AffineTransform(), subtract);
         //theArea.subtract(subtractArea);
         theAreaDrawn= theArea;
+    }
+
+    ArrayList<AffineTransform> cloneList(ArrayList<AffineTransform> list){
+        ArrayList<AffineTransform> newList = new ArrayList<AffineTransform>();
+        for(AffineTransform tran : list){
+            newList.add((AffineTransform)tran.clone());
+        }
+        return newList;
     }
 
     public class mainthread extends Thread{
@@ -377,8 +393,8 @@ public class ifsys extends Panel
         rg.setTransform(cameraTransform);
         rg.setStroke(new BasicStroke(1.0f / (float)zoom));
 
-        rg.drawRect(0,0,100,100);
-        rg.drawRect(100,100,200,200);
+        //rg.drawRect(0,0,100,100);
+        //rg.drawRect(100,100,200,200);
 
         if(theAreaDrawn!=null)
         rg.draw(theAreaDrawn);
@@ -559,7 +575,10 @@ public class ifsys extends Panel
         if(e.getKeyChar() == 's'){
             centerPt.setLocation(centerPt.getX(),centerPt.getY()+10);
         }
-
+        if(e.getKeyChar() == 'r')
+            resetShape=true;
+        if(e.getKeyChar() == 'e')
+            polarity*=-1f;
         clearframe();
 
 

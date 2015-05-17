@@ -45,8 +45,8 @@ public class MyTransformUtils {
         float shearX =(float)(Math.random()-0.5f)*1.5f;
         float shearY =(float)(Math.random()-0.5f)*1.5f;
 
-        float translateX =(float)(Math.random()-0.5f)*75f;
-        float translateY =(float)(Math.random()-0.5f)*75f;
+        float translateX =(float)(Math.random()-0.5f)*2000f*4;
+        float translateY =(float)(Math.random()-0.5f)*2000f*4;
 
         return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }
