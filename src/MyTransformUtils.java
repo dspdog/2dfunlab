@@ -15,9 +15,10 @@ public class MyTransformUtils {
     }
 
     static AffineTransform compose(AffineTransform src, AffineTransform opp){
-        src.translate(opp.getTranslateX(), opp.getTranslateY());
-        src.scale(opp.getScaleX(), opp.getScaleY());
-        src.shear(opp.getShearX(), opp.getShearY());
+        //src.translate(opp.getTranslateX(), opp.getTranslateY());
+        //src.scale(opp.getScaleX(), opp.getScaleY());
+        //src.shear(opp.getShearX(), opp.getShearY());
+        src.concatenate(opp);
         return src;
     }
 
@@ -31,8 +32,8 @@ public class MyTransformUtils {
         float shearX =(float)(rnd.nextGaussian())*size;
         float shearY =(float)(rnd.nextGaussian())*size;
 
-        float translateX =(float)(rnd.nextGaussian())*size;
-        float translateY =(float)(rnd.nextGaussian())*size;
+        float translateX =(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale*2;
+        float translateY =(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale*2;
 
         return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }

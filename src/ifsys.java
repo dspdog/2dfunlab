@@ -20,12 +20,15 @@ public class ifsys extends Panel
 
     public static ArrayList<AffineTransform> trans;
     public static ArrayList<AffineTransform> recordTrans;
+    public static ArrayList<Shape> treeShape;
+
+    public static float scaleDown = 1.0f;
 
     public static Area theSubArea;
     public static Area theArea;
     public static Area theAreaDrawn;
     public static Shape theShape;
-
+    public static Shape theScaledShape;
     Point2D realMousePt;
     Point2D centerPt = new Point2D.Double(0,0);
 
@@ -205,7 +208,7 @@ public class ifsys extends Panel
     static int generations = 0;
     static int evolves = 0;
     static boolean resetShape = true;
-
+    static String scoreString = "";
     static float polarity = 1.0f;
 
     public void updateTree(){
@@ -215,16 +218,16 @@ public class ifsys extends Panel
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(27);
+        theShape = MyPolygonUtils.NGon(37);
 
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         float intervalSec = 10f;
-        float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+        //float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
 
-        //float rndScale = 0.01f;
+        float rndScale = 0.001f;
 
-        int numberOfTransforms = 3; // = number of control points/ affines tranforms to choose from
+        int numberOfTransforms =2; // = number of control points/ affines tranforms to choose from
 
         if(trans==null || resetShape){
             resetShape=false;
@@ -238,12 +241,16 @@ public class ifsys extends Panel
             MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
         }
 
-        theArea = buildTree(4, new AffineTransform(), theShape);
+        theArea = buildTree(9, new AffineTransform(), theShape);
 
         double targetArea = 15000d;
         double startArea = MyAreaUtils.getAreaArea(theArea);
+        scaleDown = (float)Math.sqrt(targetArea / startArea);
 
-        theArea.transform(AffineTransform.getScaleInstance(Math.sqrt(targetArea/startArea),Math.sqrt(targetArea/startArea)));
+        treeShape = buildTreeShape(1, new AffineTransform(), theShape);
+
+        theArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
+        theScaledShape = AffineTransform.getScaleInstance(scaleDown,scaleDown).createTransformedShape(theShape);
 
         double enclosedArea = MyAreaUtils.getAreaArea(theArea);
         double perim = MyAreaUtils.getAreaPerimeter(theArea);
@@ -258,11 +265,11 @@ public class ifsys extends Panel
             highestScore=score;
             recordTrans = cloneList(trans); //TODO actually clone the members too not just the list
             evolves++;
-            System.out.println(
+            scoreString = (
                     "SCORE: " +String.format("%1$.12f", highestScore) + ", "
                             + attempts + " attempts, " + evolves + " evolutions, "
                             + generations + " gens, " + (generations/evolves)
-                            + " g/e cont: " + theArea.isSingular() + " area: "
+                            + " g/e cont: " + theArea.isSingular() + ", area: "
                             + String.format("%1$.2f", enclosedArea) + " (" + String.format("%1$.2f", startArea) + ") perim: " + String.format("%1$.2f", perim) );
             attempts=0;
         }else{
@@ -380,6 +387,7 @@ public class ifsys extends Panel
         rg.setColor(Color.white);
         rg.setFont(screenFont);
         int row = 15;
+        rg.drawString(scoreString, 5, row*1);
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
 
@@ -399,7 +407,17 @@ public class ifsys extends Panel
         if(theAreaDrawn!=null)
         rg.draw(theAreaDrawn);
 
-        rg.setColor(Color.red);
+
+        if(theScaledShape!=null){
+            rg.setColor(Color.red);
+            rg.draw(theScaledShape);
+
+            for(Shape shape : treeShape){
+                rg.draw(AffineTransform.getScaleInstance(scaleDown, scaleDown).createTransformedShape(shape));
+            }
+
+        }
+
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
 
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
@@ -407,14 +425,26 @@ public class ifsys extends Panel
 
     public Area buildTree(int depth, AffineTransform atAccum, Shape _theShape){
         //TODO depth per-transform
-        //TODO check for islands w/ Area.isSingular()
-
         Area result = new Area(atAccum.createTransformedShape(_theShape));
 
         if(depth > 0 )
         for(AffineTransform tran : trans){
             result.add(buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran),_theShape));
         }
+
+        return result;
+    }
+
+    public ArrayList<Shape> buildTreeShape(int depth, AffineTransform atAccum, Shape _theShape){
+        //TODO depth per-transform
+
+        ArrayList<Shape> result = new ArrayList<Shape>();
+        result.add(atAccum.createTransformedShape(_theShape));
+
+        if(depth > 0 )
+            for(AffineTransform tran : trans){
+                result.addAll(buildTreeShape(depth - 1, MyTransformUtils.compose((AffineTransform) atAccum.clone(), tran), _theShape));
+            }
 
         return result;
     }
