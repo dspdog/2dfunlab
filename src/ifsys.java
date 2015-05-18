@@ -227,7 +227,7 @@ public class ifsys extends Panel
 
         float rndScale = 0.001f;
 
-        int numberOfTransforms =2; // = number of control points/ affines tranforms to choose from
+        int numberOfTransforms =3; // = number of control points/ affines tranforms to choose from
 
         if(trans==null || resetShape){
             resetShape=false;
@@ -241,7 +241,7 @@ public class ifsys extends Panel
             MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
         }
 
-        theArea = buildTree(9, new AffineTransform(), theShape);
+        theArea = buildTree(6, new AffineTransform(), theShape);
 
         double targetArea = 15000d;
         double startArea = MyAreaUtils.getAreaArea(theArea);
@@ -423,8 +423,29 @@ public class ifsys extends Panel
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
+    /*
+
+    public Area buildTree(Shape _theShape, AffineTransform atAccum, ArrayList<Integer> depthsList){ //new ArrayList<Integer>(listA);
+        //TODO depth per-transform: (much slower)
+        Area result = new Area(atAccum.createTransformedShape(_theShape));
+
+        int numTrans = depthsList.size();
+
+        for(int i=0; i<numTrans; i++){
+            if(depthsList.get(i)>0){
+                ArrayList<Integer> copyList = new ArrayList<Integer>(depthsList);
+                copyList.set(i,copyList.get(i)-1);
+                result.add(buildTree(_theShape, MyTransformUtils.compose((AffineTransform)atAccum.clone(), trans.get(i)), copyList));
+            }
+        }
+
+        return result;
+    }
+
+     */
+
     public Area buildTree(int depth, AffineTransform atAccum, Shape _theShape){
-        //TODO depth per-transform
+
         Area result = new Area(atAccum.createTransformedShape(_theShape));
 
         if(depth > 0 )
@@ -436,7 +457,6 @@ public class ifsys extends Panel
     }
 
     public ArrayList<Shape> buildTreeShape(int depth, AffineTransform atAccum, Shape _theShape){
-        //TODO depth per-transform
 
         ArrayList<Shape> result = new ArrayList<Shape>();
         result.add(atAccum.createTransformedShape(_theShape));
