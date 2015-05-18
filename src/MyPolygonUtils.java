@@ -1,3 +1,5 @@
+import org.poly2tri.geometry.polygon.PolygonPoint;
+//import org.poly2tri.geometry.polygon.Polygon;
 import java.awt.*;
 
 /**
@@ -18,5 +20,25 @@ public class MyPolygonUtils {
         }
 
         return p;
+    }
+
+    //TODO area --> Polygon 
+    private org.poly2tri.geometry.polygon.Polygon createCirclePolygon( int n,
+                                         double scale,
+                                         double radius,
+                                         double x,
+                                         double y )
+    {
+        if( n < 3 ) n=3;
+
+        PolygonPoint[] points = new PolygonPoint[n];
+        for( int i=0; i<n; i++ )
+        {
+            points[i] = new PolygonPoint( scale*(x + radius*Math.cos( (2.0*Math.PI*i)/n )),
+                    scale*(y + radius*Math.sin( (2.0*Math.PI*i)/n ) ));
+        }
+        return new org.poly2tri.geometry.polygon.Polygon( points );
+
+        //Poly2Tri.triangulate( circle );
     }
 }

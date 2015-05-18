@@ -8,6 +8,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Random;
+
+import org.poly2tri.geometry.polygon.Polygon;
+import org.poly2tri.geometry.polygon.PolygonPoint;
 
 public class ifsys extends Panel
     implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, ActionListener,
@@ -210,6 +214,9 @@ public class ifsys extends Panel
     static boolean resetShape = true;
     static String scoreString = "";
     static float polarity = 1.0f;
+    static Random rnd = new Random();
+
+    static double targetArea = 15000d;
 
     public void updateTree(){
 
@@ -223,9 +230,9 @@ public class ifsys extends Panel
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         float intervalSec = 10f;
-        float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+        //float rndScale =  //(float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly //(float)rnd.nextGaussian()/100f; //randomly
 
-        //float rndScale = 0.001f;
+        float rndScale = 0.01f;
 
         int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
 
@@ -241,9 +248,10 @@ public class ifsys extends Panel
             MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
         }
 
+        //TODO "scan" params to move up gradient faster
+
         theArea = buildTree(9, new AffineTransform(), theShape);
 
-        double targetArea = 15000d;
         double startArea = MyAreaUtils.getAreaArea(theArea);
         scaleDown = (float)Math.sqrt(targetArea / startArea);
 
