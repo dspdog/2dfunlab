@@ -223,11 +223,11 @@ public class ifsys extends Panel
         Shape subtract = new Rectangle.Float(-10,-10,20,40);
 
         float intervalSec = 10f;
-        //float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
+        float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly
 
-        float rndScale = 0.001f;
+        //float rndScale = 0.001f;
 
-        int numberOfTransforms =3; // = number of control points/ affines tranforms to choose from
+        int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
 
         if(trans==null || resetShape){
             resetShape=false;
@@ -241,7 +241,7 @@ public class ifsys extends Panel
             MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
         }
 
-        theArea = buildTree(6, new AffineTransform(), theShape);
+        theArea = buildTree(9, new AffineTransform(), theShape);
 
         double targetArea = 15000d;
         double startArea = MyAreaUtils.getAreaArea(theArea);
