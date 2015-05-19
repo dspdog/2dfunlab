@@ -22,7 +22,7 @@ public class MyPolygonUtils {
         return p;
     }
 
-    //TODO area --> Polygon 
+    //TODO area --> Polygon
     private org.poly2tri.geometry.polygon.Polygon createCirclePolygon( int n,
                                          double scale,
                                          double radius,
