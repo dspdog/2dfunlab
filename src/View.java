@@ -305,6 +305,7 @@ public class View extends Panel
             rg.draw(theAreaDrawn);
 
             rg.setColor(Color.red);
+            if(Evolution.theRecordArea!=null)
             rg.draw(Evolution.theRecordArea);
 
 
