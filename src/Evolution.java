@@ -15,7 +15,7 @@ public class Evolution {
     static int evolves = 0;
     static boolean resetShape = true;
     static String scoreString = "";
-    static float polarity = 1.0f;
+    //static float polarity = 1.0f;
     static Random rnd = new Random();
 
     static double targetArea = 15000d;
@@ -32,6 +32,7 @@ public class Evolution {
 
     public static Area theSubArea;
     public static Area theArea;
+    public static Area theRecordArea;
     public static Shape theShape;
     public static Shape theScaledShape;
 
@@ -65,32 +66,61 @@ public class Evolution {
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(37);
-
-        float rndScale = (float)rnd.nextGaussian()*0.01f; //random gaussian scaling is good at escaping local minima!
+        theShape = MyPolygonUtils.NGon(5);
 
         int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
+
+        float startScale = 0.01f;
 
         if(trans==null || resetShape){
             resetShape=false;
             highestScore=0;
             recordTrans = new ArrayList<AffineTransform>();
             trans = new ArrayList<AffineTransform>();
-            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(rndScale)); //use getRandom for more random pts
+            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
         }
 
-        ArrayList<AffineTransform> scoreDeriv = getDerivTransforms(trans, 0.01f);
+        for(int attempt = 0; attempt<4; attempt++){
+            float rndScale = (float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
+            testDerivTransforms(trans, rndScale);
+        }
 
-        //for(AffineTransform tran : trans){
-        //    MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
-        //}
+        trans = cloneList(recordTrans);
 
-        double score = getScore(trans);
+        generations++;
 
+        View.theAreaDrawn= theArea;
+    }
 
-        if(score*polarity>=highestScore*polarity){
+    static void testDerivTransforms(ArrayList<AffineTransform> _trans, float scale){
+        for(int i=0; i<_trans.size(); i++){
+            getScore(MyTransformUtils.getNudgedList(_trans, scale, 0.0f, i));
+            getScore(MyTransformUtils.getNudgedList(_trans, 0.0f, scale, i));
+
+            getScore(MyTransformUtils.getRandomNudgedList(_trans, scale, 0.0f));
+            getScore(MyTransformUtils.getRandomNudgedList(_trans, 0.0f, scale));
+
+            float rnd = (float)Math.random();
+            getScore(MyTransformUtils.getRandomNudgedList(_trans, scale * rnd, scale * (1 - rnd)));
+        }
+    }
+
+    static double getScore(ArrayList<AffineTransform> _trans){
+        theArea = Evolution.buildTree(9, new AffineTransform(), theShape, _trans);
+        View.theAreaDrawn = theArea;
+        double startArea = MyAreaUtils.getAreaArea(theArea);
+        scaleDown = (float)Math.sqrt(targetArea / startArea);
+        //treeShape = Evolution.buildTreeShape(1, new AffineTransform(), theShape, trans);
+
+        theArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
+        theScaledShape = AffineTransform.getScaleInstance(scaleDown,scaleDown).createTransformedShape(theShape);
+
+        double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
+
+        if(score>highestScore){
+            theRecordArea = new Area(theArea);
             highestScore=score;
-            recordTrans = cloneList(trans);
+            recordTrans = cloneList(_trans);
             evolves++;
             scoreString = (
                     "SCORE: " +String.format("%1$.12f", highestScore) + ", "
@@ -104,42 +134,7 @@ public class Evolution {
             attempts++;
         }
 
-        generations++;
-
-        View.theAreaDrawn= theArea;
-    }
-
-    static ArrayList<AffineTransform> getDerivTransforms(ArrayList<AffineTransform> _trans, float scale){
-
-        ArrayList<AffineTransform> baseTrans = cloneList(_trans);
-        ArrayList<AffineTransform> derivTrans = new ArrayList<AffineTransform>();
-
-        ArrayList<Double> nudgedScoresSX = new ArrayList<Double>(); //scaleX
-        ArrayList<Double> nudgedScoresSY = new ArrayList<Double>(); //scaleY
-        double baseScore = getScore(baseTrans);
-
-        for(int i=0; i<_trans.size(); i++){
-            nudgedScoresSX.add(getScore(MyTransformUtils.getNudgedList(_trans, scale, 0.0f, i)));
-            nudgedScoresSY.add(getScore(MyTransformUtils.getNudgedList(_trans, 0.0f, scale, i)));
-        }
-
-        for(int i=0; i<_trans.size(); i++){
-            derivTrans.add(new AffineTransform(nudgedScoresSX.get(i),0,0,nudgedScoresSY.get(i),0,0)); //new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
-        }
-
-        return derivTrans;
-    }
-
-    static double getScore(ArrayList<AffineTransform> _trans){
-        theArea = Evolution.buildTree(9, new AffineTransform(), theShape, _trans);
-        double startArea = MyAreaUtils.getAreaArea(theArea);
-        scaleDown = (float)Math.sqrt(targetArea / startArea);
-        //treeShape = Evolution.buildTreeShape(1, new AffineTransform(), theShape, trans);
-
-        theArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
-        theScaledShape = AffineTransform.getScaleInstance(scaleDown,scaleDown).createTransformedShape(theShape);
-
-        return MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
+        return score;
     }
 
     public static ArrayList<AffineTransform> cloneList(ArrayList<AffineTransform> list){

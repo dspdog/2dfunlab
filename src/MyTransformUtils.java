@@ -54,6 +54,31 @@ public class MyTransformUtils {
         return nudgedList;
     }
 
+    static ArrayList<AffineTransform> getRandomNudgedList(ArrayList<AffineTransform> trans, float _scaleX, float _scaleY) {
+
+        ArrayList<AffineTransform> nudgedList = new ArrayList<AffineTransform>();
+
+        for(int i=0; i<trans.size(); i++){
+            nudgedList.add(compose(new AffineTransform(trans.get(i)),getNudge((float)(_scaleX*Math.random()),(float)(_scaleY*Math.random()))));
+        }
+
+        return nudgedList;
+    }
+
+    static ArrayList<AffineTransform> nudgeThisWithThat(ArrayList<AffineTransform> _this, ArrayList<AffineTransform> _that, float nudgeScale){
+
+        ArrayList<AffineTransform> res = new ArrayList<AffineTransform>();
+
+        for(int i=0; i<_this.size(); i++){
+            AffineTransform thisAt = new AffineTransform(_this.get(i));
+            AffineTransform thatAt = new AffineTransform(_that.get(i));
+            float rnd = (float)Math.random();
+            compose(thisAt, getNudge(thatAt.getScaleX() > 0 ? nudgeScale : -nudgeScale, thatAt.getScaleY() > 0 ? nudgeScale : -nudgeScale));
+            res.add(thisAt);
+        }
+
+        return res;
+    }
 
     static AffineTransform getNudge(float _scaleX, float _scaleY) {
 

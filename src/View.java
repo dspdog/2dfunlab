@@ -298,8 +298,18 @@ public class View extends Panel
         //rg.drawRect(0,0,100,100);
         //rg.drawRect(100,100,200,200);
 
-        if(theAreaDrawn!=null)
-        rg.draw(theAreaDrawn);
+        if(theAreaDrawn!=null){
+
+
+            rg.setColor(Color.darkGray);
+            rg.draw(theAreaDrawn);
+
+            rg.setColor(Color.red);
+            rg.draw(Evolution.theRecordArea);
+
+
+        }
+
 
 /*
         if(theScaledShape!=null){
@@ -497,8 +507,8 @@ public class View extends Panel
         }
         if(e.getKeyChar() == 'r')
             Evolution.resetShape=true;
-        if(e.getKeyChar() == 'e')
-            Evolution.polarity*=-1f;
+        //if(e.getKeyChar() == 'e')
+            //Evolution.polarity*=-1f;
         clearframe();
 
 
