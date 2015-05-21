@@ -1,5 +1,6 @@
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -28,6 +29,36 @@ public class MyTransformUtils {
 
         float scaleX =(float)(rnd.nextGaussian())*size+1f;
         float scaleY =(float)(rnd.nextGaussian())*size+1f;
+
+        float shearX = 0; //(float)(rnd.nextGaussian())*size;
+        float shearY = 0; //(float)(rnd.nextGaussian())*size;
+
+        float translateX =0;//(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale;
+        float translateY =0;//(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale;
+
+        return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
+    }
+
+    static ArrayList<AffineTransform> getNudgedList(ArrayList<AffineTransform> trans, float _scaleX, float _scaleY, int nudgeIndex) {
+
+        ArrayList<AffineTransform> nudgedList = new ArrayList<AffineTransform>();
+
+        for(int i=0; i<trans.size(); i++){
+            if(i==nudgeIndex){
+                nudgedList.add(compose(new AffineTransform(trans.get(i)),getNudge(_scaleX,_scaleY)));
+            }else{
+                nudgedList.add(new AffineTransform(trans.get(i)));
+            }
+        }
+
+        return nudgedList;
+    }
+
+
+    static AffineTransform getNudge(float _scaleX, float _scaleY) {
+
+        float scaleX =1f+_scaleX;
+        float scaleY =1f+_scaleY;
 
         float shearX = 0; //(float)(rnd.nextGaussian())*size;
         float shearY = 0; //(float)(rnd.nextGaussian())*size;

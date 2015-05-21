@@ -79,16 +79,18 @@ public class Evolution {
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(rndScale)); //use getRandom for more random pts
         }
 
-        for(AffineTransform tran : trans){
-            MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
-        }
+        ArrayList<AffineTransform> scoreDeriv = getDerivTransforms(trans, 0.01f);
+
+        //for(AffineTransform tran : trans){
+        //    MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
+        //}
 
         double score = getScore(trans);
 
 
         if(score*polarity>=highestScore*polarity){
             highestScore=score;
-            recordTrans = cloneList(trans); //TODO actually clone the members too not just the list
+            recordTrans = cloneList(trans);
             evolves++;
             scoreString = (
                     "SCORE: " +String.format("%1$.12f", highestScore) + ", "
@@ -105,6 +107,27 @@ public class Evolution {
         generations++;
 
         View.theAreaDrawn= theArea;
+    }
+
+    static ArrayList<AffineTransform> getDerivTransforms(ArrayList<AffineTransform> _trans, float scale){
+
+        ArrayList<AffineTransform> baseTrans = cloneList(_trans);
+        ArrayList<AffineTransform> derivTrans = new ArrayList<AffineTransform>();
+
+        ArrayList<Double> nudgedScoresSX = new ArrayList<Double>(); //scaleX
+        ArrayList<Double> nudgedScoresSY = new ArrayList<Double>(); //scaleY
+        double baseScore = getScore(baseTrans);
+
+        for(int i=0; i<_trans.size(); i++){
+            nudgedScoresSX.add(getScore(MyTransformUtils.getNudgedList(_trans, scale, 0.0f, i)));
+            nudgedScoresSY.add(getScore(MyTransformUtils.getNudgedList(_trans, 0.0f, scale, i)));
+        }
+
+        for(int i=0; i<_trans.size(); i++){
+            derivTrans.add(new AffineTransform(nudgedScoresSX.get(i),0,0,nudgedScoresSY.get(i),0,0)); //new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
+        }
+
+        return derivTrans;
     }
 
     static double getScore(ArrayList<AffineTransform> _trans){
