@@ -66,7 +66,7 @@ public class Evolution {
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(5);
+        theShape = MyPolygonUtils.NGon(13);
 
         int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
 
@@ -80,8 +80,9 @@ public class Evolution {
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
         }
 
-        for(int attempt = 0; attempt<4; attempt++){
-            float rndScale = (float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
+        float max = 100f;
+        for(int attempt = 0; attempt<max; attempt++){
+            float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
             testDerivTransforms(trans, rndScale);
         }
 
