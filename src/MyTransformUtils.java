@@ -51,7 +51,4 @@ public class MyTransformUtils {
 
         return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }
-
-
-
 }

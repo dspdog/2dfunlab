@@ -7,32 +7,15 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Random;
 
-import org.poly2tri.geometry.polygon.Polygon;
-import org.poly2tri.geometry.polygon.PolygonPoint;
-
-public class ifsys extends Panel
+public class View extends Panel
     implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, ActionListener,
         ItemListener
 {
 
 
-    static double highestScore = 0;
-
-
-    public static ArrayList<AffineTransform> trans;
-    public static ArrayList<AffineTransform> recordTrans;
-    public static ArrayList<Shape> treeShape;
-
-    public static float scaleDown = 1.0f;
-
-    public static Area theSubArea;
-    public static Area theArea;
     public static Area theAreaDrawn;
-    public static Shape theShape;
-    public static Shape theScaledShape;
+
     Point2D realMousePt;
     Point2D centerPt = new Point2D.Double(0,0);
 
@@ -110,7 +93,7 @@ public class ifsys extends Panel
     boolean started;
     int preset;
 
-    public ifsys(){
+    public View(){
         started=false;
         samplesThisFrame=0;
         oneSecondAgo =0;
@@ -153,7 +136,7 @@ public class ifsys extends Panel
             };
         });
 
-        ifsys is = new ifsys();
+        View is = new View();
         is.setSize(is.screenwidth, is.screenheight); // same size as defined in the HTML APPLET
         f.add(is);
         f.pack();
@@ -208,103 +191,6 @@ public class ifsys extends Panel
             }
     }
 
-    static int attempts = 0;
-    static int generations = 0;
-    static int evolves = 0;
-    static boolean resetShape = true;
-    static String scoreString = "";
-    static float polarity = 1.0f;
-    static Random rnd = new Random();
-
-    static double targetArea = 15000d;
-
-    public void updateTree(){
-
-        //TODO reset shape every few seconds
-
-        MyTransformUtils.setTime();
-        theArea = new Area();
-        theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(37);
-
-        Shape subtract = new Rectangle.Float(-10,-10,20,40);
-
-        float intervalSec = 10f;
-        //float rndScale = (float)(0.001f + Math.abs(Math.cos(System.currentTimeMillis()*0.001*Math.PI*2/intervalSec)*0.01)); //temp oscillates slowly //(float)rnd.nextGaussian()/100f; //randomly
-
-        float rndScale = (float)rnd.nextGaussian()*0.01f; //random gaussian scaling is good at escaping local minima!
-
-        int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
-
-        if(trans==null || resetShape){
-            resetShape=false;
-            highestScore=0;
-            recordTrans = new ArrayList<AffineTransform>();
-            trans = new ArrayList<AffineTransform>();
-            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(rndScale)); //use getRandom for more random pts
-        }
-
-        for(AffineTransform tran : trans){
-            MyTransformUtils.compose(tran,MyTransformUtils.getRandomSmall(rndScale)); //nudge each transform
-        }
-
-        //TODO "scan" params to move up gradient faster
-
-        theArea = buildTree(9, new AffineTransform(), theShape);
-
-        double startArea = MyAreaUtils.getAreaArea(theArea);
-        scaleDown = (float)Math.sqrt(targetArea / startArea);
-
-        treeShape = buildTreeShape(1, new AffineTransform(), theShape);
-
-        theArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
-        theScaledShape = AffineTransform.getScaleInstance(scaleDown,scaleDown).createTransformedShape(theShape);
-
-        double enclosedArea = MyAreaUtils.getAreaArea(theArea);
-        double perim = MyAreaUtils.getAreaPerimeter(theArea);
-
-        double score = perim / enclosedArea;
-
-        if(score*polarity>=highestScore*polarity){
-
-            //TODO take picture
-            //TODO save area/transforms to list, show "replay"
-
-            highestScore=score;
-            recordTrans = cloneList(trans); //TODO actually clone the members too not just the list
-            evolves++;
-            scoreString = (
-                    "SCORE: " +String.format("%1$.12f", highestScore) + ", "
-                            + attempts + " attempts, " + evolves + " evolutions, "
-                            + generations + " gens, " + (generations/evolves)
-                            + " g/e cont: " + theArea.isSingular() + ", area: "
-                            + String.format("%1$.2f", enclosedArea) + " (" + String.format("%1$.2f", startArea) + ") perim: " + String.format("%1$.2f", perim) );
-            attempts=0;
-        }else{
-            if(recordTrans!=null)
-            trans =cloneList(recordTrans);
-            attempts++;
-        }
-
-
-
-        generations++;
-
-        //System.out.println("Perim/Area = " + MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea));
-
-        //Area subtractArea = buildTree(4, new AffineTransform(), subtract);
-        //theArea.subtract(subtractArea);
-        theAreaDrawn= theArea;
-    }
-
-    ArrayList<AffineTransform> cloneList(ArrayList<AffineTransform> list){
-        ArrayList<AffineTransform> newList = new ArrayList<AffineTransform>();
-        for(AffineTransform tran : list){
-            newList.add((AffineTransform)tran.clone());
-        }
-        return newList;
-    }
-
     public class mainthread extends Thread{
         public void run(){
             while(!quit){
@@ -336,7 +222,7 @@ public class ifsys extends Panel
         public void run(){
             while(!quit){
                 framesThisSecondLogic++;
-                updateTree();
+                Evolution.updateTree();
                 try {
                     sleep(1);
                 } catch (InterruptedException e) {
@@ -395,7 +281,7 @@ public class ifsys extends Panel
         rg.setColor(Color.white);
         rg.setFont(screenFont);
         int row = 15;
-        rg.drawString(scoreString, 5, row*1);
+        rg.drawString(Evolution.scoreString, 5, row*1);
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
 
@@ -415,7 +301,7 @@ public class ifsys extends Panel
         if(theAreaDrawn!=null)
         rg.draw(theAreaDrawn);
 
-
+/*
         if(theScaledShape!=null){
             rg.setColor(Color.red);
             rg.draw(theScaledShape);
@@ -425,6 +311,7 @@ public class ifsys extends Panel
             }
 
         }
+*/
 
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
 
@@ -451,31 +338,6 @@ public class ifsys extends Panel
     }
 
      */
-
-    public Area buildTree(int depth, AffineTransform atAccum, Shape _theShape){
-
-        Area result = new Area(atAccum.createTransformedShape(_theShape));
-
-        if(depth > 0 )
-        for(AffineTransform tran : trans){
-            result.add(buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran),_theShape));
-        }
-
-        return result;
-    }
-
-    public ArrayList<Shape> buildTreeShape(int depth, AffineTransform atAccum, Shape _theShape){
-
-        ArrayList<Shape> result = new ArrayList<Shape>();
-        result.add(atAccum.createTransformedShape(_theShape));
-
-        if(depth > 0 )
-            for(AffineTransform tran : trans){
-                result.addAll(buildTreeShape(depth - 1, MyTransformUtils.compose((AffineTransform) atAccum.clone(), tran), _theShape));
-            }
-
-        return result;
-    }
 
     public void clearframe(){
         for(int a = 0; a < screenwidth * screenheight; a++){
@@ -634,9 +496,9 @@ public class ifsys extends Panel
             centerPt.setLocation(centerPt.getX(),centerPt.getY()+10);
         }
         if(e.getKeyChar() == 'r')
-            resetShape=true;
+            Evolution.resetShape=true;
         if(e.getKeyChar() == 'e')
-            polarity*=-1f;
+            Evolution.polarity*=-1f;
         clearframe();
 
 
