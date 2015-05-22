@@ -11,8 +11,8 @@ import java.util.ArrayList;
 public class MyAreaUtils {
 
     static double getAreaPerimeter(Area area){
-        if(area.getBounds2D().getWidth()>500 || area.getBounds2D().getHeight()>500 || !area.isSingular())return 0;
-        return polygonPerimeter(getAreaSegments(area)); //TODO switch back to weighted?
+        if(area.getBounds2D().getWidth()>500 || area.getBounds2D().getHeight()>500 || !area.isSingular())return 0; //TODO use max distance instead of width/height
+        return polygonPerimeter(getAreaSegments(area));
     }
 
     static double getAreaArea(Area area){
