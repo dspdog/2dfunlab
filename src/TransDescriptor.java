@@ -1,5 +1,6 @@
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by user on 5/21/2015.
@@ -30,7 +31,6 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
 
     public TransDescriptor randomAncestor(){
         int gens = (int)(Math.random()*generation);
-        System.out.println("ANCESTOR N"+gens);
         return myNParent(gens);
     }
 
@@ -44,7 +44,11 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
 
     public void submitChild(ArrayList<AffineTransform> list1){
         double _score = Evolution.getScore(list1);
-        if(_score>this.score){this.children.add(new TransDescriptor(list1, _score, 0, this)); }
+        if(_score>this.score){
+            TransDescriptor addition = new TransDescriptor(list1, _score, 0, this);
+            this.children.add(addition);
+            Evolution.scoreList.add(addition);
+        }
         else{attempts++;}
     }
 

@@ -25,6 +25,8 @@ public class Evolution {
     static double highestScore = 0;
 
 
+    public static ArrayList<TransDescriptor> scoreList = new ArrayList<TransDescriptor>();
+
     public static ArrayList<AffineTransform> trans;
     public static TransDescriptor desc;
     public static ArrayList<AffineTransform> recordTrans;
@@ -87,7 +89,6 @@ public class Evolution {
                 desc = desc.children.get(0);
                 System.out.println("GEN " + desc.generation);
             }else{
-                //TODO reset to higher parent?
                 desc = desc.randomAncestor();
                 System.out.println("---GEN " + desc.generation);
             }
@@ -104,6 +105,8 @@ public class Evolution {
         System.out.println(desc.children.size() + " offspring");
         generations++;
         View.theAreaDrawn= theArea;
+
+        Collections.sort(scoreList);
     }
 
     static void testDerivTransforms(float scale, TransDescriptor parentTransform){
