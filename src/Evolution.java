@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -25,6 +26,7 @@ public class Evolution {
 
 
     public static ArrayList<AffineTransform> trans;
+    public static TransDescriptor desc;
     public static ArrayList<AffineTransform> recordTrans;
     //public static ArrayList<Shape> treeShape;
 
@@ -77,33 +79,38 @@ public class Evolution {
             recordTrans = new ArrayList<AffineTransform>();
             trans = new ArrayList<AffineTransform>();
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
+            double score = getScore(trans);
+            desc = new TransDescriptor(trans,score,0);
+        }else{
+            if(desc.children.size()>0){
+                Collections.sort(desc.children);
+                desc = desc.children.get(0);
+            }else{
+                //TODO reset to higher parent?
+            }
         }
 
-        //TODO create affineDescriptor here
+        trans = desc.trans;
 
-        float max = 25f;
+        float max = 100f;
         for(int attempt = 0; attempt<max; attempt++){
             float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
-            testDerivTransforms(trans, rndScale);
+            testDerivTransforms(rndScale, desc);
         }
 
-        trans = cloneList(recordTrans); //TODO get list from recordDescriptor
-
+        System.out.println(desc.children.size() + " offspring");
         generations++;
-
         View.theAreaDrawn= theArea;
     }
 
-    static void testDerivTransforms(ArrayList<AffineTransform> _trans, float scale){
-        for(int i=0; i<_trans.size(); i++){
-            getScore(MyTransformUtils.getNudgedList(_trans, scale, 0.0f, i));
-            getScore(MyTransformUtils.getNudgedList(_trans, 0.0f, scale, i));
-
-            getScore(MyTransformUtils.getRandomNudgedList(_trans, scale, 0.0f));
-            getScore(MyTransformUtils.getRandomNudgedList(_trans, 0.0f, scale));
-
+    static void testDerivTransforms(float scale, TransDescriptor parentTransform){
+        for(int i=0; i<parentTransform.trans.size(); i++){
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, scale, 0.0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0.0f, scale, i));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale, 0.0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0.0f, scale));
             float rnd = (float)Math.random();
-            getScore(MyTransformUtils.getRandomNudgedList(_trans, scale * rnd, scale * (1 - rnd)));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd)));
         }
     }
 
@@ -123,25 +130,6 @@ public class Evolution {
         double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
 
         //TODO reduce score according to variance^2
-
-        //if(MyPolygonUtils.worldScale*targetArea/startArea<0.5)score=0;
-
-        if(score>highestScore){
-            theRecordArea = new Area(theArea);
-            highestScore=score;
-            recordTrans = cloneList(_trans);
-            evolves++;
-            scoreString = (
-                    "SCORE: " +String.format("%1$.12f", highestScore) + ", "
-                            + attempts + " attempts, " + evolves + " evolutions, "
-                            + generations + " gens, " + (generations/evolves)
-                            + " g/e cont: " + theArea.isSingular() + ", area: ");
-            attempts=0;
-        }else{
-            if(recordTrans!=null)
-                trans = cloneList(recordTrans);
-            attempts++;
-        }
 
         return score;
     }
