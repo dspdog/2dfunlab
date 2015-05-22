@@ -53,7 +53,14 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     }
 
     @Override
-    public int compareTo(TransDescriptor o) {
+
+    public int compareTo(TransDescriptor o) { //compare by attempts ascending then score descending
+        if(o.attempts==this.attempts)return this.compareToScore(o);
+        return o.attempts > this.attempts ? -1 : 1;
+    }
+
+    public int compareToScore(TransDescriptor o) { //compare by score only
+        if(o.score==this.score)return 0;
         return o.score > this.score ? 1 : -1;
     }
 }

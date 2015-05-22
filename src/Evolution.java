@@ -87,22 +87,20 @@ public class Evolution {
             if(desc.children.size()>0){
                 Collections.sort(desc.children);
                 desc = desc.children.get(0);
-                System.out.println("GEN " + desc.generation);
             }else{
                 desc = desc.randomAncestor();
-                System.out.println("---GEN " + desc.generation);
             }
         }
 
+        System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + " SIBS " + desc.children.size());
         trans = desc.trans;
 
-        System.out.println("TOTAL "+scoreList.size());
+        float max = 10f;
         for(int attempt = 0; attempt<max; attempt++){
             float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
             testDerivTransforms(rndScale, desc);
         }
 
-        System.out.println(desc.children.size() + " offspring");
         generations++;
         View.theAreaDrawn= theArea;
 
