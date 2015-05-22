@@ -30,7 +30,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     }
 
     public TransDescriptor randomAncestor(){
-        int gens = (int)(Math.random()*generationsBeforeMe()+1); //+1 just makes it reset a bit more
+        int gens = (int)(Math.random()*generationsBeforeMe()+15); //+X just makes it reset a bit more
         return myNParent(gens);
     }
 

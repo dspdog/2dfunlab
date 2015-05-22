@@ -100,7 +100,7 @@ public class Evolution {
             if(scoreList.size()>10)
             desc = scoreList.get(0); //using elements other than #1 doesnt converge as well
 
-            float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
+            float rndScale = (float)rnd.nextGaussian()*(attempt/max);//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
             testDerivTransforms(rndScale, desc);
 
             Collections.sort(scoreList);
