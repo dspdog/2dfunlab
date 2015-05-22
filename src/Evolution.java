@@ -73,7 +73,7 @@ public class Evolution {
 
         int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
 
-        float startScale = 0.01f;
+        float startScale = 0.00f; //zero = no bias for upper-most parent 
 
         if(trans==null || resetShape){
             resetShape=false;
