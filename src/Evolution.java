@@ -143,12 +143,20 @@ public class Evolution {
 
     static void testDerivTransforms(float scale, TransDescriptor parentTransform){
         for(int i=0; i<parentTransform.trans.size(); i++){
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, scale, 0.0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0.0f, scale, i));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale, 0.0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0.0f, scale));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, scale, 0f, 0f,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, scale, 0f,0f, i));
+
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, scale,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,scale, i));
+
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale, 0f,0f,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, scale,0f,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, scale, 0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, scale));
+
             float rnd = (float)Math.random();
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd)));
+            float rnd2 = (float)Math.random();
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd), scale * rnd2, scale * (1 - rnd2)));
         }
     }
 

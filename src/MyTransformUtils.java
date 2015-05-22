@@ -39,13 +39,13 @@ public class MyTransformUtils {
         return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }
 
-    static ArrayList<AffineTransform> getNudgedList(ArrayList<AffineTransform> trans, float _scaleX, float _scaleY, int nudgeIndex) {
+    static ArrayList<AffineTransform> getNudgedList(ArrayList<AffineTransform> trans, float _scaleX, float _scaleY, float _shearX, float _shearY, int nudgeIndex) {
 
         ArrayList<AffineTransform> nudgedList = new ArrayList<AffineTransform>();
 
         for(int i=0; i<trans.size(); i++){
             if(i==nudgeIndex){
-                nudgedList.add(compose(new AffineTransform(trans.get(i)),getNudge(_scaleX,_scaleY)));
+                nudgedList.add(compose(new AffineTransform(trans.get(i)),getNudge(_scaleX,_scaleY, _shearX, _shearY)));
             }else{
                 nudgedList.add(new AffineTransform(trans.get(i)));
             }
@@ -54,12 +54,17 @@ public class MyTransformUtils {
         return nudgedList;
     }
 
-    static ArrayList<AffineTransform> getRandomNudgedList(ArrayList<AffineTransform> trans, float _scaleX, float _scaleY) {
+    static ArrayList<AffineTransform> getRandomNudgedList(ArrayList<AffineTransform> trans, float _scaleX, float _scaleY, float _shearX, float _shearY) {
 
         ArrayList<AffineTransform> nudgedList = new ArrayList<AffineTransform>();
 
         for(int i=0; i<trans.size(); i++){
-            nudgedList.add(compose(new AffineTransform(trans.get(i)),getNudge((float)(_scaleX*Math.random()),(float)(_scaleY*Math.random()))));
+            nudgedList.add(compose(new AffineTransform(trans.get(i)),
+                    getNudge(
+                            (float)(_scaleX*Math.random()),
+                            (float)(_scaleY*Math.random()),
+                            (float)(_shearX*Math.random()),
+                            (float)(_shearY*Math.random()))));
         }
 
         return nudgedList;
@@ -72,21 +77,21 @@ public class MyTransformUtils {
         for(int i=0; i<_this.size(); i++){
             AffineTransform thisAt = new AffineTransform(_this.get(i));
             AffineTransform thatAt = new AffineTransform(_that.get(i));
-            float rnd = (float)Math.random();
-            compose(thisAt, getNudge(thatAt.getScaleX() > 0 ? nudgeScale : -nudgeScale, thatAt.getScaleY() > 0 ? nudgeScale : -nudgeScale));
+            //float rnd = (float)Math.random();
+            compose(thisAt, getNudge(thatAt.getScaleX() > 0 ? nudgeScale : -nudgeScale,
+                                     thatAt.getScaleY() > 0 ? nudgeScale : -nudgeScale,
+                                     thatAt.getShearX() > 0 ? nudgeScale : -nudgeScale,
+                                     thatAt.getShearY() > 0 ? nudgeScale : -nudgeScale));
             res.add(thisAt);
         }
 
         return res;
     }
 
-    static AffineTransform getNudge(float _scaleX, float _scaleY) {
+    static AffineTransform getNudge(float _scaleX, float _scaleY, float shearX, float shearY) {
 
         float scaleX =1f+_scaleX;
         float scaleY =1f+_scaleY;
-
-        float shearX = 0; //(float)(rnd.nextGaussian())*size;
-        float shearY = 0; //(float)(rnd.nextGaussian())*size;
 
         float translateX =0;//(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale;
         float translateY =0;//(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale;
