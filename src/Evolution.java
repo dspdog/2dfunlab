@@ -110,21 +110,27 @@ public class Evolution {
     }
 
     public static void pruneList(){
-        int maxSize = 1000;
+        int maxSize = 100;
+
+        //TODO remove non-top siblings from scoreList
+
         if(scoreList.size()>maxSize){
-
             for(TransDescriptor tran : scoreList.subList(maxSize, scoreList.size())){
-                tran.parent.children.remove(tran);
-                //update family tree
-                tran.parent.children.addAll(tran.children);
-                for(TransDescriptor child : tran.children){
-                    child.parent = tran.parent;
-                }
+                deleteFromGraph(tran);
             }
-
             scoreList.subList(maxSize, scoreList.size()).clear();
         }
 
+        //TODO remove non-top sibs from families?
+    }
+
+    static void deleteFromGraph(TransDescriptor tran){
+        tran.parent.children.remove(tran);
+        //update family tree
+        tran.parent.children.addAll(tran.children);
+        for(TransDescriptor child : tran.children){
+            child.parent = tran.parent;
+        }
     }
 
     static void testDerivTransforms(float scale, TransDescriptor parentTransform){
