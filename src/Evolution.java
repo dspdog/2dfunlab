@@ -73,7 +73,7 @@ public class Evolution {
 
         int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
 
-        float startScale = 0.00f; //zero = no bias for upper-most parent 
+        float startScale = 0.00f; //zero = no bias for upper-most parent
 
         if(trans==null || resetShape){
             resetShape=false;
@@ -96,7 +96,7 @@ public class Evolution {
 
         trans = desc.trans;
 
-        float max = 100f;
+        System.out.println("TOTAL "+scoreList.size());
         for(int attempt = 0; attempt<max; attempt++){
             float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
             testDerivTransforms(rndScale, desc);

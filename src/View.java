@@ -287,7 +287,9 @@ public class View extends Panel
 
         int max = Math.min(50,Evolution.scoreList.size());
         for(int scoreNum=0; scoreNum<max; scoreNum++){
-            rg.drawString((1+scoreNum) + ": " + Evolution.scoreList.get(scoreNum).score + " GEN " + Evolution.scoreList.get(scoreNum).generation, 5, row*(4+scoreNum));
+            rg.drawString((1+scoreNum) + ": " + Evolution.scoreList.get(scoreNum).score +
+                    " GEN " + Evolution.scoreList.get(scoreNum).generation +
+                    " ATTEMPTS " + Evolution.scoreList.get(scoreNum).attempts, 5, row*(4+scoreNum));
         }
 
         //centerPt.setLocation(realMousePt);
