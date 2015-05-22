@@ -14,17 +14,17 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, int _attempts){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score){
         trans=Evolution.cloneList(_trans);
         score=_score;
-        attempts=_attempts;
+        attempts = 1;
         generation = 0;
     }
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, int _attempts, TransDescriptor _parent){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent){
         trans=Evolution.cloneList(_trans);
         score=_score;
-        attempts=_attempts;
+        attempts=1;
         parent=_parent;
         generation = parent.generation+1;
     }
@@ -36,11 +36,17 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
 
     public TransDescriptor myNParent(int gens){
         if(gens==0){
-            return this;
+            return this;//.bestOfMySiblings();
         }else{
             if(parent==null)return this;
             return parent.myNParent(gens-1);
         }
+    }
+
+    public TransDescriptor bestOfMySiblings(){
+        if(parent==null)return this;
+        Collections.sort(parent.children);
+        return parent.children.get(0);
     }
 
     public int generationsBeforeMe(){
@@ -55,11 +61,17 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     public void submitChild(ArrayList<AffineTransform> list1){
         double _score = Evolution.getScore(list1);
         if(_score>this.score){
-            TransDescriptor addition = new TransDescriptor(list1, _score, 0, this);
+            TransDescriptor addition = new TransDescriptor(list1, _score, this);
             this.children.add(addition);
             Evolution.scoreList.add(addition);
         }
-        else{attempts++;}
+        else{
+            attempts++;
+            score*=0.99999d;
+            //if(attempts>200){
+            //    Evolution.deleteFromGraph(this);
+            //}
+        }
     }
 
     @Override

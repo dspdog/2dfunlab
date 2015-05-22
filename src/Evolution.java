@@ -3,6 +3,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -10,20 +11,14 @@ import java.util.Random;
  */
 public class Evolution {
 
-
-    static int attempts = 0;
     static int generations = 0;
-    static int evolves = 0;
     static boolean resetShape = true;
     static String scoreString = "";
-    //static float polarity = 1.0f;
     static Random rnd = new Random();
 
     static double targetArea = 15000d;
 
-
     static double highestScore = 0;
-
 
     public static ArrayList<TransDescriptor> scoreList = new ArrayList<TransDescriptor>();
 
@@ -80,20 +75,24 @@ public class Evolution {
             highestScore=0;
             recordTrans = new ArrayList<AffineTransform>();
             trans = new ArrayList<AffineTransform>();
+            scoreList = new ArrayList<TransDescriptor>();
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
             double score = getScore(trans);
-            desc = new TransDescriptor(trans,score,0);
+            desc = new TransDescriptor(trans,score);
         }else{
             if(desc.children.size()>0){
                 Collections.sort(desc.children);
+                //int index = (int)(Math.min(desc.children.size()-1, Math.abs(rnd.nextGaussian()*3f))); //gaussian sibling index
                 desc = desc.children.get(0);
             }else{
                 desc = desc.randomAncestor();
                 System.out.println("UP");
             }
         }
+        if(desc.parent!=null){
+            System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + "(" + desc.generationsBeforeMe() + ") SIBS " + desc.parent.children.size());
+        }
 
-        System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + "(" + desc.generationsBeforeMe() + ") SIBS " + desc.children.size());
         trans = desc.trans;
 
         float max = 10f;
@@ -110,9 +109,16 @@ public class Evolution {
     }
 
     public static void pruneList(){
-        int maxSize = 100;
+        int maxSize = 5000;
 
-        //TODO remove non-top siblings from scoreList
+        //remove all but top siblings from list
+        HashSet<TransDescriptor> newList = new HashSet<TransDescriptor>();
+        for(TransDescriptor tran : scoreList){
+            newList.add(tran.bestOfMySiblings());
+        }
+
+        scoreList=new ArrayList<TransDescriptor>(newList);
+        Collections.sort(scoreList);
 
         if(scoreList.size()>maxSize){
             for(TransDescriptor tran : scoreList.subList(maxSize, scoreList.size())){
@@ -124,12 +130,14 @@ public class Evolution {
         //TODO remove non-top sibs from families?
     }
 
-    static void deleteFromGraph(TransDescriptor tran){
-        tran.parent.children.remove(tran);
-        //update family tree
-        tran.parent.children.addAll(tran.children);
-        for(TransDescriptor child : tran.children){
-            child.parent = tran.parent;
+    static public void deleteFromGraph(TransDescriptor tran){
+        if(tran.parent!=null){
+            tran.parent.children.remove(tran);
+            //update family tree
+            tran.parent.children.addAll(tran.children);
+            for(TransDescriptor child : tran.children){
+                child.parent = tran.parent;
+            }
         }
     }
 

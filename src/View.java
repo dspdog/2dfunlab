@@ -285,7 +285,7 @@ public class View extends Panel
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
 
-        int max = Math.min(50,Evolution.scoreList.size());
+        int max = Math.min(50,Evolution.scoreList.size()-2);
         for(int scoreNum=0; scoreNum<max; scoreNum++){
             rg.drawString((1+scoreNum) + ": " + Evolution.scoreList.get(scoreNum).score +
                     " GEN " + Evolution.scoreList.get(scoreNum).generation +
