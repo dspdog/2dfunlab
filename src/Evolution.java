@@ -85,8 +85,11 @@ public class Evolution {
             if(desc.children.size()>0){
                 Collections.sort(desc.children);
                 desc = desc.children.get(0);
+                System.out.println("GEN " + desc.generation);
             }else{
                 //TODO reset to higher parent?
+                desc = desc.randomAncestor();
+                System.out.println("---GEN " + desc.generation);
             }
         }
 

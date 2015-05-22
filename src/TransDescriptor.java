@@ -6,8 +6,9 @@ import java.util.ArrayList;
  */
 public class TransDescriptor implements Comparable<TransDescriptor>{
     ArrayList<AffineTransform> trans;
-    double score = 0;
-    int attempts = 0; //attempts it took to get here
+    double score;
+    int attempts; //attempts it took to get here
+    int generation;
 
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
@@ -16,6 +17,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts=_attempts;
+        generation = 0;
     }
 
     public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, int _attempts, TransDescriptor _parent){
@@ -23,6 +25,21 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         score=_score;
         attempts=_attempts;
         parent=_parent;
+        generation = parent.generation+1;
+    }
+
+    public TransDescriptor randomAncestor(){
+        int gens = (int)(Math.random()*generation);
+        System.out.println("ANCESTOR N"+gens);
+        return myNParent(gens);
+    }
+
+    public TransDescriptor myNParent(int gens){
+        if(gens==0){
+            return this;
+        }else{
+            return parent.myNParent(gens-1);
+        }
     }
 
     public void submitChild(ArrayList<AffineTransform> list1){
