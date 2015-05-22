@@ -9,7 +9,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     ArrayList<AffineTransform> trans;
     double score;
     int attempts; //attempts it took to get here
-    int generation;
+    int generation; //doesnt account for parents removed from graph -- see generationsBeforeMe()
 
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
@@ -30,7 +30,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     }
 
     public TransDescriptor randomAncestor(){
-        int gens = (int)(Math.random()*generation);
+        int gens = (int)(Math.random()*generationsBeforeMe()+1); //+1 just makes it reset a bit more
         return myNParent(gens);
     }
 
@@ -38,8 +38,18 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         if(gens==0){
             return this;
         }else{
+            if(parent==null)return this;
             return parent.myNParent(gens-1);
         }
+    }
+
+    public int generationsBeforeMe(){
+        return generationsBeforeMe(0);
+    }
+
+    public int generationsBeforeMe(int i){
+        if(parent==null)return i;
+        return parent.generationsBeforeMe(i + 1);
     }
 
     public void submitChild(ArrayList<AffineTransform> list1){
@@ -54,12 +64,12 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
 
     @Override
 
-    public int compareTo(TransDescriptor o) { //compare by attempts ascending then score descending
+    /*public int compareTo(TransDescriptor o) { //compare by attempts ascending then score descending
         if(o.attempts==this.attempts)return this.compareToScore(o);
         return o.attempts > this.attempts ? -1 : 1;
-    }
+    }*/
 
-    public int compareToScore(TransDescriptor o) { //compare by score only
+    public int compareTo(TransDescriptor o) { //compare by score only
         if(o.score==this.score)return 0;
         return o.score > this.score ? 1 : -1;
     }

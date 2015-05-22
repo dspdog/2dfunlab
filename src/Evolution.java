@@ -89,10 +89,11 @@ public class Evolution {
                 desc = desc.children.get(0);
             }else{
                 desc = desc.randomAncestor();
+                System.out.println("UP");
             }
         }
 
-        System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + " SIBS " + desc.children.size());
+        System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + "(" + desc.generationsBeforeMe() + ") SIBS " + desc.children.size());
         trans = desc.trans;
 
         float max = 10f;
@@ -105,6 +106,25 @@ public class Evolution {
         View.theAreaDrawn= theArea;
 
         Collections.sort(scoreList);
+        pruneList();
+    }
+
+    public static void pruneList(){
+        int maxSize = 1000;
+        if(scoreList.size()>maxSize){
+
+            for(TransDescriptor tran : scoreList.subList(maxSize, scoreList.size())){
+                tran.parent.children.remove(tran);
+                //update family tree
+                tran.parent.children.addAll(tran.children);
+                for(TransDescriptor child : tran.children){
+                    child.parent = tran.parent;
+                }
+            }
+
+            scoreList.subList(maxSize, scoreList.size()).clear();
+        }
+
     }
 
     static void testDerivTransforms(float scale, TransDescriptor parentTransform){
