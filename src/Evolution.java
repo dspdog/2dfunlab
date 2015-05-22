@@ -61,7 +61,6 @@ public class Evolution {
         return result;
     }
 
-
     public static void updateTree(){
         MyTransformUtils.setTime();
         theArea = new Area();
@@ -80,13 +79,15 @@ public class Evolution {
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
         }
 
+        //TODO create affineDescriptor here
+
         float max = 25f;
         for(int attempt = 0; attempt<max; attempt++){
             float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
             testDerivTransforms(trans, rndScale);
         }
 
-        trans = cloneList(recordTrans);
+        trans = cloneList(recordTrans); //TODO get list from recordDescriptor
 
         generations++;
 
