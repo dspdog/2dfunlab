@@ -95,26 +95,30 @@ public class Evolution {
 
         trans = desc.trans;
 
-        float max = 10f;
+        float max = 50f;
         for(int attempt = 0; attempt<max; attempt++){
+            if(scoreList.size()>10)
+            desc = scoreList.get(0); //using elements other than #1 doesnt converge as well
+
             float rndScale = (float)rnd.nextGaussian()*attempt/max;//(float)rnd.nextGaussian()*0.1f; //random gaussian scaling is good at escaping local minima!
             testDerivTransforms(rndScale, desc);
+
+            Collections.sort(scoreList);
         }
 
         generations++;
         View.theAreaDrawn= theArea;
 
-        Collections.sort(scoreList);
         pruneList();
     }
 
     public static void pruneList(){
-        int maxSize = 5000;
+        int maxSize = 500;
 
         //remove all but top siblings from list
         HashSet<TransDescriptor> newList = new HashSet<TransDescriptor>();
         for(TransDescriptor tran : scoreList){
-            newList.add(tran.bestOfMySiblings());
+            newList.addAll(tran.bestOfMySiblings(1)); //converges best w/ 1
         }
 
         scoreList=new ArrayList<TransDescriptor>(newList);
@@ -165,7 +169,7 @@ public class Evolution {
         //TODO place "limits" on transform strength
 
         theArea = Evolution.buildTree(4, new AffineTransform(), theShape, _trans);
-        View.theAreaDrawn = theArea;
+
         double startArea = MyAreaUtils.getAreaArea(theArea);
         scaleDown = (float)Math.sqrt(targetArea / startArea);
         //treeShape = Evolution.buildTreeShape(1, new AffineTransform(), theShape, trans);
@@ -174,7 +178,7 @@ public class Evolution {
         theScaledShape = AffineTransform.getScaleInstance(scaleDown,scaleDown).createTransformedShape(theShape);
 
         double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
-
+        View.theAreaDrawn = theArea;
         //TODO reduce score according to variance^2
 
         return score;

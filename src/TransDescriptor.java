@@ -43,10 +43,17 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         }
     }
 
-    public TransDescriptor bestOfMySiblings(){
-        if(parent==null)return this;
+    public ArrayList<TransDescriptor> bestOfMySiblings(int n){
+        ArrayList<TransDescriptor> res = new ArrayList<TransDescriptor>();
+
+        if(parent==null){
+            res.add(this);
+            return res;
+        }
+
         Collections.sort(parent.children);
-        return parent.children.get(0);
+        res = new ArrayList<TransDescriptor>(parent.children.subList(0,(int)Math.min(n, parent.children.size())));
+        return res;
     }
 
     public int generationsBeforeMe(){
@@ -67,7 +74,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         }
         else{
             attempts++;
-            score*=0.99999d;
+            score*=0.9999d;
             //if(attempts>200){
             //    Evolution.deleteFromGraph(this);
             //}
