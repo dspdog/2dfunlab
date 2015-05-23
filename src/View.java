@@ -282,9 +282,9 @@ public class View extends Panel
         rg.setFont(screenFont);
         int row = 15;
         rg.drawString(Evolution.scoreString, 5, row*1);
-        rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*2);
-        rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*3);
-
+        rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*1);
+        rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*2);
+        rg.drawString("FAMILY " + String.valueOf(TransDescriptor.familyNumber) + " ", 5, row*3);
         try{
             int max = Math.min(50,Evolution.scoreList.size()-2);
             for(int scoreNum=0; scoreNum<max; scoreNum++){

@@ -61,8 +61,6 @@ public class Evolution {
         return result;
     }
 
-    public static int familyNumber = 0;
-
     public static void updateTree(){
         MyTransformUtils.setTime();
         theArea = new Area();
@@ -74,7 +72,6 @@ public class Evolution {
         float startScale = 0.00f; //zero = no bias for upper-most parent
 
         if(trans==null || resetShape){
-            familyNumber++;
             resetShape=false;
             highestScore=0;
             recordTrans = new ArrayList<AffineTransform>();
@@ -82,7 +79,7 @@ public class Evolution {
             scoreList = new ArrayList<TransDescriptor>();
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
             double score = getScore(trans);
-            desc = new TransDescriptor(trans,score, familyNumber);
+            desc = new TransDescriptor(trans,score);
         }else{
             if(desc.children.size()>0){
                 Collections.sort(desc.children);

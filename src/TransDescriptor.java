@@ -14,26 +14,27 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     long myId = -1;
 
     final int MEMBERS_PER_FAMILY = 512;
+    public static int familyNumber = 0;
 
     public static long familyMembers = 0;
 
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, int _famNum){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score){
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts = 1;
         generation = 0;
-        famNum=_famNum;
+        famNum=familyNumber;
     }
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent, int _famNum){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent){
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts=1;
         parent=_parent;
-        famNum=_famNum;
+        famNum=familyNumber;
         generation = parent.generation+1;
 
         familyMembers++;
@@ -42,6 +43,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         if(familyMembers %MEMBERS_PER_FAMILY==0){
             Evolution.resetShape=true; //start new family
             familyMembers=0;
+            familyNumber++;
         }
     }
 
@@ -84,7 +86,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     public void submitChild(ArrayList<AffineTransform> list1){
         double _score = Evolution.getScore(list1);
         if(_score>this.score){
-            TransDescriptor addition = new TransDescriptor(list1, _score, this, famNum);
+            TransDescriptor addition = new TransDescriptor(list1, _score, this);
             this.children.add(addition);
             Evolution.scoreList.add(addition);
             Evolution.globalScoreList.add(addition);
