@@ -21,6 +21,7 @@ public class Evolution {
     static double highestScore = 0;
 
     public static ArrayList<TransDescriptor> scoreList = new ArrayList<TransDescriptor>();
+    public static ArrayList<TransDescriptor> globalScoreList = new ArrayList<TransDescriptor>();
 
     public static ArrayList<AffineTransform> trans;
     public static TransDescriptor desc;
@@ -60,6 +61,8 @@ public class Evolution {
         return result;
     }
 
+    public static int familyNumber = 0;
+
     public static void updateTree(){
         MyTransformUtils.setTime();
         theArea = new Area();
@@ -71,6 +74,7 @@ public class Evolution {
         float startScale = 0.00f; //zero = no bias for upper-most parent
 
         if(trans==null || resetShape){
+            familyNumber++;
             resetShape=false;
             highestScore=0;
             recordTrans = new ArrayList<AffineTransform>();
@@ -78,7 +82,7 @@ public class Evolution {
             scoreList = new ArrayList<TransDescriptor>();
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
             double score = getScore(trans);
-            desc = new TransDescriptor(trans,score);
+            desc = new TransDescriptor(trans,score, familyNumber);
         }else{
             if(desc.children.size()>0){
                 Collections.sort(desc.children);
@@ -113,16 +117,30 @@ public class Evolution {
     }
 
     public static void pruneList(){
-        int maxSize = 500;
+        int maxSize = 5000;
 
         //remove all but top siblings from list
         HashSet<TransDescriptor> newList = new HashSet<TransDescriptor>();
+        HashSet<TransDescriptor> newGlobalList = new HashSet<TransDescriptor>();
         for(TransDescriptor tran : scoreList){
             newList.addAll(tran.bestOfMySiblings(1)); //converges best w/ 1
         }
 
+        for(TransDescriptor tran : globalScoreList){
+            newGlobalList.addAll(tran.bestOfMySiblings(1)); //converges best w/ 1
+        }
+
         scoreList=new ArrayList<TransDescriptor>(newList);
+        globalScoreList=new ArrayList<TransDescriptor>(newGlobalList);
+
         Collections.sort(scoreList);
+        Collections.sort(globalScoreList);
+        //globalScoreList.ensureCapacity(maxSize*5);
+        //globalScoreList.subList(maxSize*5, globalScoreList.size()).clear(); //global is 5 times bigger than local, why not
+
+        if(globalScoreList.size()>maxSize){
+            globalScoreList.subList(maxSize, scoreList.size()).clear();
+        }
 
         if(scoreList.size()>maxSize){
             for(TransDescriptor tran : scoreList.subList(maxSize, scoreList.size())){

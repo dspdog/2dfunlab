@@ -10,23 +10,39 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     double score;
     int attempts; //attempts it took to get here
     int generation; //doesnt account for parents removed from graph -- see generationsBeforeMe()
+    int famNum;
+    long myId = -1;
+
+    final int MEMBERS_PER_FAMILY = 512;
+
+    public static long familyMembers = 0;
 
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, int _famNum){
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts = 1;
         generation = 0;
+        famNum=_famNum;
     }
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent, int _famNum){
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts=1;
         parent=_parent;
+        famNum=_famNum;
         generation = parent.generation+1;
+
+        familyMembers++;
+        myId= familyMembers;
+
+        if(familyMembers %MEMBERS_PER_FAMILY==0){
+            Evolution.resetShape=true; //start new family
+            familyMembers=0;
+        }
     }
 
     public TransDescriptor randomAncestor(){
@@ -68,12 +84,14 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     public void submitChild(ArrayList<AffineTransform> list1){
         double _score = Evolution.getScore(list1);
         if(_score>this.score){
-            TransDescriptor addition = new TransDescriptor(list1, _score, this);
+            TransDescriptor addition = new TransDescriptor(list1, _score, this, famNum);
             this.children.add(addition);
             Evolution.scoreList.add(addition);
+            Evolution.globalScoreList.add(addition);
         }
         else{
             attempts++;
+            if(attempts>20)
             score*=0.9999d;
             //if(attempts>200){
             //    Evolution.deleteFromGraph(this);
