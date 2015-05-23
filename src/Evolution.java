@@ -136,7 +136,7 @@ public class Evolution {
         //globalScoreList.subList(maxSize*5, globalScoreList.size()).clear(); //global is 5 times bigger than local, why not
 
         if(globalScoreList.size()>maxSize){
-            globalScoreList.subList(maxSize, scoreList.size()).clear();
+            globalScoreList.subList(maxSize, globalScoreList.size()).clear();
         }
 
         if(scoreList.size()>maxSize){

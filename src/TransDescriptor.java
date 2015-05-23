@@ -13,7 +13,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     int famNum;
     long myId = -1;
 
-    final int MEMBERS_PER_FAMILY = 512;
+    final int MEMBERS_PER_FAMILY = 200;
     public static int familyNumber = 0;
 
     public static long familyMembers = 0;

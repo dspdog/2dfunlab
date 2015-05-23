@@ -290,7 +290,7 @@ public class View extends Panel
             for(int scoreNum=0; scoreNum<max; scoreNum++){
                 rg.drawString((1+scoreNum) + ": " + Evolution.scoreList.get(scoreNum).score +
                         " G " + Evolution.scoreList.get(scoreNum).generation +
-                        " A " + Evolution.scoreList.get(scoreNum).attempts, 5, row*(4+scoreNum));
+                        " A " + Evolution.scoreList.get(scoreNum).attempts + " I " + Evolution.scoreList.get(scoreNum).myId, 5, row*(4+scoreNum));
             }
 
             max = Math.min(50,Evolution.globalScoreList.size()-2);
