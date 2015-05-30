@@ -1,3 +1,4 @@
+import javax.swing.table.AbstractTableModel;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -112,4 +113,58 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         if(o.score==this.score)return 0;
         return o.score > this.score ? 1 : -1;
     }
+
+
+    public static class TableModel extends AbstractTableModel {
+
+        private ArrayList<TransDescriptor> descs;
+        private String[] columnNames= {"generation", "famNum", "score", "id", "attempts"};
+
+        public TableModel(ArrayList<TransDescriptor> descs){
+            this.descs = descs;
+        }
+
+        @Override
+        public int getRowCount() {
+            return descs.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        public String getColumnName(int column) {
+            return columnNames[column];
+        }
+
+        public void add(TransDescriptor desc) {
+            descs.add(desc);
+        }
+
+        public void remove(TransDescriptor desc) {
+            if (descs.contains(desc)) {
+                descs.remove(desc);
+            }
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            TransDescriptor desc = descs.get(rowIndex);
+            switch (columnIndex){
+                case 0:
+                    return desc.generation;
+                case 1:
+                    return desc.famNum;
+                case 2:
+                    return desc.score;
+                case 3:
+                    return desc.myId;
+                case 4:
+                    return desc.attempts;
+            }
+            return "";
+        }
+    }
+
 }

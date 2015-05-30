@@ -1,13 +1,9 @@
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.PixelGrabber;
-import java.net.URL;
 
 public class View extends Panel
     implements MouseWheelListener, KeyListener, FocusListener, ActionListener
@@ -122,13 +118,21 @@ public class View extends Panel
         View is = new View();
         is.setSize(is.screenwidth, is.screenheight); // same size as defined in the HTML APPLET
 
-        Object rowData2[][] = { { "Row1-Column1", "Row1-Column2", "Row1-Column3"},
-                                { "Row2-Column1", "Row2-Column2", "Row2-Column3"} };
-        Object columnNames2[] = { "Column One", "Column Two", "Column Three"};
-        JTable table2 = new JTable(rowData2, columnNames2);
+
+        final TransDescriptor.TableModel model = new TransDescriptor.TableModel(Evolution.globalScoreList);
+        final JTable table = new JTable(model);
+
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(Evolution.globalScoreList);
+                table.setModel(_model);
+            }
+        });
+        timer.start();
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                is, new JScrollPane(table2));
+                is, new JScrollPane(table));
 
         splitPane.setDividerLocation(512);
 
