@@ -1,5 +1,6 @@
 import javax.swing.table.AbstractTableModel;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -13,14 +14,25 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     int generation; //doesnt account for parents removed from graph -- see generationsBeforeMe()
     int famNum;
     long myId = -1;
+    Area myArea= null;
 
-    final int MEMBERS_PER_FAMILY = 200;
+    public static final int MEMBERS_PER_FAMILY = 200;
     public static int familyNumber = 0;
 
     public static long familyMembers = 0;
 
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
+
+    public Area getArea(){
+        if(myArea==null){
+            myArea = Evolution.buildTree(4, new AffineTransform(), Evolution.theShape, trans);
+            double startArea = MyAreaUtils.getAreaArea(myArea);
+            double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
+            myArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
+        }
+        return myArea;
+    }
 
     public TransDescriptor(ArrayList<AffineTransform> _trans, double _score){
         trans=Evolution.cloneList(_trans);
@@ -39,11 +51,10 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         generation = parent.generation+1;
 
         familyMembers++;
-        myId= familyMembers;
+        myId=familyMembers;
 
         if(familyMembers %MEMBERS_PER_FAMILY==0){
             Evolution.resetShape=true; //start new family
-            familyMembers=0;
             familyNumber++;
         }
     }
@@ -117,11 +128,16 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
 
     public static class TableModel extends AbstractTableModel {
 
-        private ArrayList<TransDescriptor> descs;
+        public ArrayList<TransDescriptor> descs;
         private String[] columnNames= {"generation", "famNum", "score", "id", "attempts"};
 
-        public TableModel(ArrayList<TransDescriptor> descs){
+        public TransDescriptor selected=null;
+
+        public TableModel(ArrayList<TransDescriptor> descs, TransDescriptor _selected){
             this.descs = descs;
+            if(_selected!=null){
+                selected=_selected;
+            }
         }
 
         @Override
@@ -152,6 +168,8 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         public Object getValueAt(int rowIndex, int columnIndex) {
             TransDescriptor desc = descs.get(rowIndex);
             switch (columnIndex){
+                case -1:
+                    return desc;
                 case 0:
                     return desc.generation;
                 case 1:

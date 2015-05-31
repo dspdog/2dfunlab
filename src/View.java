@@ -1,12 +1,14 @@
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 
 public class View extends Panel
-    implements MouseWheelListener, KeyListener, FocusListener, ActionListener
+    implements MouseWheelListener, KeyListener, FocusListener, ActionListener, MouseMotionListener
 
 {
 
@@ -106,6 +108,8 @@ public class View extends Panel
         pointselected=-1;
     }
 
+    static TransDescriptor selectedTrans = null;
+
     public static void main(String[] args) {
         JFrame f = new JFrame();
 
@@ -119,14 +123,28 @@ public class View extends Panel
         is.setSize(is.screenwidth, is.screenheight); // same size as defined in the HTML APPLET
 
 
-        final TransDescriptor.TableModel model = new TransDescriptor.TableModel(Evolution.globalScoreList);
+        final TransDescriptor.TableModel model = new TransDescriptor.TableModel(Evolution.globalScoreList, selectedTrans);
         final JTable table = new JTable(model);
+
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if(table.getSelectedRow()!=-1){
+                    selectedTrans = (TransDescriptor) table.getValueAt(table.getSelectedRow(),-1);
+                }
+            }
+        });
 
         Timer timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(Evolution.globalScoreList);
+                final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(Evolution.globalScoreList, selectedTrans);
                 table.setModel(_model);
+
+                int index = Evolution.globalScoreList.indexOf(_model.selected);
+
+                if(index>=0)
+                table.setRowSelectionInterval(index,index);
+
             }
         });
         timer.start();
@@ -245,6 +263,9 @@ public class View extends Panel
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*1);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*2);
         rg.drawString("FAMILY " + String.valueOf(TransDescriptor.familyNumber) + " ", 5, row*3);
+        rg.drawString("SIB #" + String.valueOf(TransDescriptor.familyMembers%TransDescriptor.MEMBERS_PER_FAMILY) + " ", 5, row*4);
+        rg.drawString("INDIV #" + String.valueOf(TransDescriptor.familyMembers) + " ", 5, row*5);
+        /*
         try{
             int max = Math.min(50,Evolution.scoreList.size()-2);
             for(int scoreNum=0; scoreNum<max; scoreNum++){
@@ -260,7 +281,7 @@ public class View extends Panel
             }
         }catch (Exception e){
 
-        }
+        }*/
 
 
         cameraTransform = new AffineTransform();
@@ -277,6 +298,12 @@ public class View extends Panel
 
             rg.setColor(Color.darkGray);
             rg.draw(theAreaDrawn);
+
+            if(selectedTrans!=null){
+                rg.setColor(Color.green);
+                rg.draw(selectedTrans.getArea());
+            }
+
 
             rg.setColor(Color.red);
             if(Evolution.theRecordArea!=null)
@@ -349,6 +376,11 @@ public class View extends Panel
         clearframe();
 
 
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        //aJTable.rowAtPoint(e.getPoint());
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {

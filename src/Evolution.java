@@ -179,7 +179,7 @@ public class Evolution {
         }
     }
 
-    static double getScore(ArrayList<AffineTransform> _trans){
+    static double getScore(ArrayList<AffineTransform> _trans){//TODO return area along with score!
 
         //TODO place "limits" on transform strength
 
