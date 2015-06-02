@@ -16,17 +16,16 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     long myId = -1;
     Area myArea= null;
 
-    public static final int MEMBERS_PER_FAMILY = 200;
-    public static int familyNumber = 0;
+    public Evolution evolution;
 
-    public static long familyMembers = 0;
+    public static final int MEMBERS_PER_FAMILY = 200;
 
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
 
     public Area getArea(){
         if(myArea==null){
-            myArea = Evolution.buildTree(4, new AffineTransform(), Evolution.theShape, trans);
+            myArea = evolution.buildTree(4, new AffineTransform(), evolution.theShape, trans);
             double startArea = MyAreaUtils.getAreaArea(myArea);
             double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
             myArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
@@ -34,28 +33,31 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         return myArea;
     }
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, Evolution _evolution){
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts = 1;
         generation = 0;
-        famNum=familyNumber;
+        evolution=_evolution;
+        famNum=evolution.familyNumber;
     }
 
-    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent){
+    public TransDescriptor(ArrayList<AffineTransform> _trans, double _score, TransDescriptor _parent, Evolution _evolution){
+        evolution=_evolution;
         trans=Evolution.cloneList(_trans);
         score=_score;
         attempts=1;
         parent=_parent;
-        famNum=familyNumber;
         generation = parent.generation+1;
+        famNum=evolution.familyNumber;
 
-        familyMembers++;
-        myId=familyMembers;
+        evolution.familyMembers++;
+        Evolution.familyMembersGlobal++;
+        myId=Evolution.familyMembersGlobal;
 
-        if(familyMembers %MEMBERS_PER_FAMILY==0){
-            Evolution.resetShape=true; //start new family
-            familyNumber++;
+        if(evolution.familyMembers %MEMBERS_PER_FAMILY==0){
+            evolution.resetShape=true; //start new family
+            evolution.familyNumber++;
         }
     }
 
@@ -96,12 +98,12 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     }
 
     public void submitChild(ArrayList<AffineTransform> list1){
-        double _score = Evolution.getScore(list1);
+        double _score = evolution.getScore(list1);
         if(_score>this.score){
-            TransDescriptor addition = new TransDescriptor(list1, _score, this);
+            TransDescriptor addition = new TransDescriptor(list1, _score, this, evolution);
             this.children.add(addition);
-            Evolution.scoreList.add(addition);
-            Evolution.globalScoreList.add(addition);
+            evolution.scoreList.add(addition);
+            evolution.globalScoreList.add(addition);
         }
         else{
             attempts++;

@@ -11,32 +11,44 @@ import java.util.Random;
  */
 public class Evolution {
 
-    static int generations = 0;
-    static boolean resetShape = true;
-    static String scoreString = "";
-    static Random rnd = new Random();
+    int generations = 0;
+    boolean resetShape = true;
+    String scoreString = "";
+    Random rnd = new Random();
+    static public int familyMembersGlobal = 0;
+    public int familyNumber = 0;
+    public long familyMembers = 0;
 
     static double targetArea = 15000d;
 
-    static double highestScore = 0;
+    double highestScore = 0;
 
-    public static ArrayList<TransDescriptor> scoreList = new ArrayList<TransDescriptor>();
-    public static ArrayList<TransDescriptor> globalScoreList = new ArrayList<TransDescriptor>();
+    public ArrayList<TransDescriptor> scoreList = new ArrayList<TransDescriptor>();
+    public ArrayList<TransDescriptor> globalScoreList = new ArrayList<TransDescriptor>();
 
-    public static ArrayList<AffineTransform> trans;
-    public static TransDescriptor desc;
-    public static ArrayList<AffineTransform> recordTrans;
+    public ArrayList<AffineTransform> trans;
+    public TransDescriptor desc;
+    public ArrayList<AffineTransform> recordTrans;
     //public static ArrayList<Shape> treeShape;
 
-    public static float scaleDown = 1.0f;
+    public float scaleDown = 1.0f;
 
-    public static Area theSubArea;
-    public static Area theArea;
-    public static Area theRecordArea;
-    public static Shape theShape;
-    public static Shape theScaledShape;
+    public Area theSubArea;
+    public Area theArea;
+    public Area theRecordArea;
+    public Shape theShape;
+    public Shape theScaledShape;
 
-    public static Area buildTree(int depth, AffineTransform atAccum, Shape _theShape, ArrayList<AffineTransform> _trans){
+    public Evolution(){
+        scaleDown = 1.0f;
+        generations=0;
+        resetShape = true;
+        targetArea = 15000d;
+        scoreList = new ArrayList<TransDescriptor>();
+        globalScoreList = new ArrayList<TransDescriptor>();
+    }
+
+    public Area buildTree(int depth, AffineTransform atAccum, Shape _theShape, ArrayList<AffineTransform> _trans){
 
         Area result = new Area(atAccum.createTransformedShape(_theShape));
 
@@ -48,7 +60,7 @@ public class Evolution {
         return result;
     }
 
-    public static ArrayList<Shape> buildTreeShape(int depth, AffineTransform atAccum, Shape _theShape, ArrayList<AffineTransform> trans){
+    public ArrayList<Shape> buildTreeShape(int depth, AffineTransform atAccum, Shape _theShape, ArrayList<AffineTransform> trans){
 
         ArrayList<Shape> result = new ArrayList<Shape>();
         result.add(atAccum.createTransformedShape(_theShape));
@@ -61,7 +73,7 @@ public class Evolution {
         return result;
     }
 
-    public static void updateTree(){
+    public void updateTree(){
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
@@ -79,7 +91,7 @@ public class Evolution {
             scoreList = new ArrayList<TransDescriptor>();
             for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
             double score = getScore(trans);
-            desc = new TransDescriptor(trans,score);
+            desc = new TransDescriptor(trans,score, this);
         }else{
             if(desc.children.size()>0){
                 Collections.sort(desc.children);
@@ -93,6 +105,8 @@ public class Evolution {
         if(desc.parent!=null){
             System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + "(" + desc.generationsBeforeMe() + ") SIBS " + desc.parent.children.size());
         }
+
+        System.out.println(globalScoreList.size() + " SCORES");
 
         trans = desc.trans;
 
@@ -113,7 +127,7 @@ public class Evolution {
         pruneList();
     }
 
-    public static void pruneList(){
+    public void pruneList(){
         int maxSize = 5000;
 
         //remove all but top siblings from list
@@ -145,8 +159,6 @@ public class Evolution {
             }
             scoreList.subList(maxSize, scoreList.size()).clear();
         }
-
-        //TODO remove non-top sibs from families?
     }
 
     static public void deleteFromGraph(TransDescriptor tran){
@@ -179,11 +191,11 @@ public class Evolution {
         }
     }
 
-    static double getScore(ArrayList<AffineTransform> _trans){//TODO return area along with score!
+    double getScore(ArrayList<AffineTransform> _trans){//TODO return area along with score!
 
         //TODO place "limits" on transform strength
 
-        theArea = Evolution.buildTree(4, new AffineTransform(), theShape, _trans);
+        theArea = this.buildTree(4, new AffineTransform(), theShape, _trans);
 
         double startArea = MyAreaUtils.getAreaArea(theArea);
         scaleDown = (float)Math.sqrt(targetArea / startArea);
@@ -206,7 +218,5 @@ public class Evolution {
         }
         return newList;
     }
-
-
 }
 

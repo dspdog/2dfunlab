@@ -6,20 +6,18 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class View extends Panel
     implements MouseWheelListener, KeyListener, FocusListener, ActionListener, MouseMotionListener
 
 {
-
-
     public static Area theAreaDrawn;
 
     Point2D realMousePt;
     Point2D centerPt = new Point2D.Double(0,0);
 
     final mainthread game;
-    final mainthread2 treeThread;
     boolean quit;
     final int screenwidth;
     final int screenheight;
@@ -42,24 +40,15 @@ public class View extends Panel
 
     double zoom = 1.0;
 
+    static int NUMEVOLVERS = 4;
 
+    public ArrayList<Evolution> myEvolutions = new ArrayList<>();
+    public static ArrayList<EvolutionThread> myEvolutionThreads = new ArrayList<>();
+    public static ArrayList<TransDescriptor> theFullList = new ArrayList<>();
     //user params
 
-        boolean antiAliasing;
-
-        boolean infoHidden;
-        boolean imgSamples;
-        boolean guidesHidden;
-        boolean ptsHidden;
-        boolean invertColors;
-        int sampletotal;
-        int iterations;
-        int pointselected;
 
 
-        boolean shiftDown;
-        boolean ctrlDown;
-        boolean altDown;
         static int mousex;
         static int mousey;
         int mouseScroll;
@@ -75,37 +64,30 @@ public class View extends Panel
 
 
     public View(){
+
+        for(int i=0; i<NUMEVOLVERS; i++){
+            Evolution theEvolution = new Evolution();
+            myEvolutions.add(theEvolution);
+            myEvolutionThreads.add(new EvolutionThread(theEvolution));
+        }
+
         started=false;
-        samplesThisFrame=0;
         oneSecondAgo =0;
         framesThisSecondDrawn = 0;
         framesThisSecondLogic = 0;
-        altDown=false;
-        ctrlDown=false;
-        shiftDown=false;
         game = new mainthread();
-        treeThread = new mainthread2();
+
         quit = false;
-        antiAliasing = true;
-        infoHidden = false;
-        imgSamples = true;
-        guidesHidden = false;
-        ptsHidden = false;
-        invertColors = false;
         screenwidth = 1024;
         screenheight = 512;
         pixels = new int[screenwidth * screenheight];
 
         pixelsData = new double[screenwidth * screenheight];
-        sampletotal = 1000;
-        iterations = 2;
         mousemode = 0;
         samplesNeeded = 1;
         maxLineLength = screenwidth;
 
         mouseScroll = 0;
-
-        pointselected=-1;
     }
 
     static TransDescriptor selectedTrans = null;
@@ -119,11 +101,11 @@ public class View extends Panel
             };
         });
 
-        View is = new View();
+        final View is = new View();
         is.setSize(is.screenwidth, is.screenheight); // same size as defined in the HTML APPLET
+        is.init();
 
-
-        final TransDescriptor.TableModel model = new TransDescriptor.TableModel(Evolution.globalScoreList, selectedTrans);
+        final TransDescriptor.TableModel model = new TransDescriptor.TableModel(theFullList, selectedTrans);
         final JTable table = new JTable(model);
 
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -137,14 +119,15 @@ public class View extends Panel
         Timer timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(Evolution.globalScoreList, selectedTrans);
+
+                combinedLists(is);
+
+                final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(theFullList, selectedTrans);
                 table.setModel(_model);
 
-                int index = Evolution.globalScoreList.indexOf(_model.selected);
-
+                int index = theFullList.indexOf(_model.selected);
                 if(index>=0)
                 table.setRowSelectionInterval(index,index);
-
             }
         });
         timer.start();
@@ -157,16 +140,29 @@ public class View extends Panel
         f.add(splitPane);
 
         f.pack();
-        is.init();
+
         f.setSize(is.screenwidth, is.screenheight*2 + 20); // add 20, seems enough for the Frame title,
         f.show();
+    }
+
+
+
+    public static ArrayList<TransDescriptor> combinedLists( View is){
+        ArrayList<TransDescriptor> result = new ArrayList<TransDescriptor>();
+
+        for(Evolution e : is.myEvolutions){
+            result.addAll(e.globalScoreList);
+        }
+
+        theFullList = result;
+
+        return result;
     }
 
     public void init() {
         System.setProperty("sun.java2d.opengl","True");
         start();
     }
-
 
     public void actionPerformed(ActionEvent e) {
 
@@ -199,11 +195,14 @@ public class View extends Panel
     }
 
 
-    public class mainthread2 extends Thread{
+    public class EvolutionThread extends Thread{
+
+        Evolution evolution;
+
         public void run(){
             while(!quit){
                 framesThisSecondLogic++;
-                Evolution.updateTree();
+                evolution.updateTree();
                 try {
                     sleep(1);
                 } catch (InterruptedException e) {
@@ -212,7 +211,8 @@ public class View extends Panel
             }
         }
 
-        public mainthread2(){
+        public EvolutionThread(Evolution _evolution){
+            evolution=_evolution;
         }
     }
 
@@ -225,11 +225,14 @@ public class View extends Panel
         rg = (Graphics2D)render.getGraphics();
 
         clearframe();
-        treeThread.start();
+
+        for(EvolutionThread t : myEvolutionThreads){
+            t.start();
+        }
+
         game.start();
 
         started = true;
-        //NodeWorld.resetWorld(1);
     }
 
     public void update(Graphics gr){
@@ -259,30 +262,10 @@ public class View extends Panel
         rg.setColor(Color.white);
         rg.setFont(screenFont);
         int row = 15;
-        rg.drawString(Evolution.scoreString, 5, row*1);
+       // rg.drawString(myEvolution1.scoreString, 5, row*1);
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*1);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*2);
-        rg.drawString("FAMILY " + String.valueOf(TransDescriptor.familyNumber) + " ", 5, row*3);
-        rg.drawString("SIB #" + String.valueOf(TransDescriptor.familyMembers%TransDescriptor.MEMBERS_PER_FAMILY) + " ", 5, row*4);
-        rg.drawString("INDIV #" + String.valueOf(TransDescriptor.familyMembers) + " ", 5, row*5);
-        /*
-        try{
-            int max = Math.min(50,Evolution.scoreList.size()-2);
-            for(int scoreNum=0; scoreNum<max; scoreNum++){
-                rg.drawString((1+scoreNum) + ": " + Evolution.scoreList.get(scoreNum).score +
-                        " G " + Evolution.scoreList.get(scoreNum).generation +
-                        " A " + Evolution.scoreList.get(scoreNum).attempts + " I " + Evolution.scoreList.get(scoreNum).myId, 5, row*(4+scoreNum));
-            }
-
-            max = Math.min(50,Evolution.globalScoreList.size()-2);
-            for(int scoreNum=0; scoreNum<max; scoreNum++){
-                TransDescriptor trans = Evolution.globalScoreList.get(scoreNum);
-                rg.drawString((1+scoreNum) + ": " + trans.score + " F_"+trans.famNum+"_" + trans.myId + " g"+trans.generation, 500, row*(4+scoreNum));
-            }
-        }catch (Exception e){
-
-        }*/
-
+        rg.drawString("INDIV #" + String.valueOf(Evolution.familyMembersGlobal) + " ", 5, row*3);
 
         cameraTransform = new AffineTransform();
         cameraTransform.translate(screenwidth/2,screenheight/2);
@@ -294,8 +277,6 @@ public class View extends Panel
 
 
         if(theAreaDrawn!=null){
-
-
             rg.setColor(Color.darkGray);
             rg.draw(theAreaDrawn);
 
@@ -306,14 +287,12 @@ public class View extends Panel
 
 
             rg.setColor(Color.red);
-            if(Evolution.theRecordArea!=null)
-            rg.draw(Evolution.theRecordArea);
-
-
+            //TODO1
+           // if(myEvolution1.theRecordArea!=null)
+           // rg.draw(myEvolution1.theRecordArea);
         }
 
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
-
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 
@@ -413,8 +392,8 @@ public class View extends Panel
         if(e.getKeyChar() == 's'){
             centerPt.setLocation(centerPt.getX(),centerPt.getY()+10);
         }
-        if(e.getKeyChar() == 'r')
-            Evolution.resetShape=true;
+        //if(e.getKeyChar() == 'r')
+        //    myEvolution.resetShape=true;
         clearframe();
     }
 
