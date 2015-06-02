@@ -7,11 +7,14 @@ import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class View extends Panel
     implements MouseWheelListener, KeyListener, FocusListener, ActionListener, MouseMotionListener
 
 {
+    static long startTime = System.currentTimeMillis();
+
     public static Area theAreaDrawn;
 
     Point2D realMousePt;
@@ -40,7 +43,7 @@ public class View extends Panel
 
     double zoom = 1.0;
 
-    static int NUMEVOLVERS = 4;
+    static int NUMEVOLVERS = 12;
 
     public ArrayList<Evolution> myEvolutions = new ArrayList<>();
     public static ArrayList<EvolutionThread> myEvolutionThreads = new ArrayList<>();
@@ -116,11 +119,12 @@ public class View extends Panel
             }
         });
 
-        Timer timer = new Timer(1000, new ActionListener() {
+        Timer timer = new Timer(5000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 combinedLists(is);
+                Collections.sort(theFullList);
 
                 final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(theFullList, selectedTrans);
                 table.setModel(_model);
@@ -265,7 +269,7 @@ public class View extends Panel
        // rg.drawString(myEvolution1.scoreString, 5, row*1);
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*1);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*2);
-        rg.drawString("INDIV #" + String.valueOf(Evolution.familyMembersGlobal) + " ", 5, row*3);
+        rg.drawString("INDIV #" + String.valueOf(Evolution.familyMembersGlobal) + " " + (1.0f * Evolution.familyMembersGlobal / ((System.currentTimeMillis()-startTime)/1000f)) + "i/s", 5, row*3);
 
         cameraTransform = new AffineTransform();
         cameraTransform.translate(screenwidth/2,screenheight/2);

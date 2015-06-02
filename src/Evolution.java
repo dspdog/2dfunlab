@@ -102,11 +102,10 @@ public class Evolution {
                 System.out.println("UP");
             }
         }
-        if(desc.parent!=null){
-            System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + "(" + desc.generationsBeforeMe() + ") SIBS " + desc.parent.children.size());
-        }
 
-        System.out.println(globalScoreList.size() + " SCORES");
+        //if(desc.parent!=null){
+        //    System.out.println("CURRENTLY #" + scoreList.indexOf(desc) + "/" + scoreList.size() + " GEN " + desc.generation + "(" + desc.generationsBeforeMe() + ") SIBS " + desc.parent.children.size());
+        //}
 
         trans = desc.trans;
 
