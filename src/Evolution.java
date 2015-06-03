@@ -14,7 +14,7 @@ public class Evolution {
     int generations = 0;
     boolean resetShape = true;
     String scoreString = "";
-    Random rnd = new Random();
+    static Random rnd = new Random();
     static public int familyMembersGlobal = 0;
     public int familyNumber = 0;
     public long familyMembers = 0;
@@ -99,7 +99,7 @@ public class Evolution {
                 desc = desc.children.get(0);
             }else{
                 desc = desc.randomAncestor();
-                System.out.println("UP");
+               // System.out.println("UP");
             }
         }
 

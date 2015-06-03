@@ -20,7 +20,7 @@ public class View extends Panel
     Point2D realMousePt;
     Point2D centerPt = new Point2D.Double(0,0);
 
-    final mainthread game;
+    final UIThread game;
     boolean quit;
     final int screenwidth;
     final int screenheight;
@@ -43,7 +43,7 @@ public class View extends Panel
 
     double zoom = 1.0;
 
-    static int NUMEVOLVERS = 12;
+    static int NUMEVOLVERS = 7;
 
     public ArrayList<Evolution> myEvolutions = new ArrayList<>();
     public static ArrayList<EvolutionThread> myEvolutionThreads = new ArrayList<>();
@@ -78,7 +78,7 @@ public class View extends Panel
         oneSecondAgo =0;
         framesThisSecondDrawn = 0;
         framesThisSecondLogic = 0;
-        game = new mainthread();
+        game = new UIThread();
 
         quit = false;
         screenwidth = 1024;
@@ -124,7 +124,14 @@ public class View extends Panel
             public void actionPerformed(ActionEvent e) {
 
                 combinedLists(is);
-                Collections.sort(theFullList);
+
+                try{
+
+                    Collections.sort(theFullList);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+
 
                 final TransDescriptor.TableModel _model = new TransDescriptor.TableModel(theFullList, selectedTrans);
                 table.setModel(_model);
@@ -172,10 +179,10 @@ public class View extends Panel
 
     }
 
-    public class mainthread extends Thread{
+    public class UIThread extends Thread{
         public void run(){
             while(!quit){
-                //framesThisSecondLogic++;
+
                 Point2D mousePt = new Point2D.Float(mousex,mousey);
                 Point2D _mousePt = new Point2D.Float(mousex,mousey);
 
@@ -187,14 +194,14 @@ public class View extends Panel
 
                 repaint();
                 try {
-                    sleep(1);
+                    sleep(20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
 
-        public mainthread(){
+        public UIThread(){
         }
     }
 
@@ -207,11 +214,6 @@ public class View extends Panel
             while(!quit){
                 framesThisSecondLogic++;
                 evolution.updateTree();
-                try {
-                    sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         }
 
@@ -221,8 +223,6 @@ public class View extends Panel
     }
 
     public void start(){
-        //setCursor (Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-
         addMouseWheelListener(this);
         addKeyListener(this);
         render =  new BufferedImage(screenwidth, screenheight, BufferedImage.TYPE_INT_RGB); //createImage(screenwidth, screenheight);
@@ -260,16 +260,17 @@ public class View extends Panel
             framesThisSecondLogic =0;
         }
 
-        rg.setColor(new Color(0.1f,0.1f,0.1f));
+        rg.setColor(new Color(1f,1f,1f));
         rg.fillRect(0, 0, screenwidth, screenheight);
 
-        rg.setColor(Color.white);
+        rg.setColor(Color.black);
         rg.setFont(screenFont);
         int row = 15;
        // rg.drawString(myEvolution1.scoreString, 5, row*1);
         rg.drawString("FPS DRAW " + String.valueOf(fpsDraw) + " ", 5, row*1);
         rg.drawString("FPS LOGIC " + String.valueOf(fpsLogic), 5, row*2);
-        rg.drawString("INDIV #" + String.valueOf(Evolution.familyMembersGlobal) + " " + (1.0f * Evolution.familyMembersGlobal / ((System.currentTimeMillis()-startTime)/1000f)) + "i/s", 5, row*3);
+        rg.drawString("INDIV #" + String.valueOf(Evolution.familyMembersGlobal) + " " + (int)(1.0f * Evolution.familyMembersGlobal / ((System.currentTimeMillis()-startTime)/1000f)) + "i/s", 5, row*3);
+        rg.drawString("FAM #" + myEvolutions.get(0).familyNumber, 5, row*4);
 
         cameraTransform = new AffineTransform();
         cameraTransform.translate(screenwidth/2,screenheight/2);
@@ -281,12 +282,12 @@ public class View extends Panel
 
 
         if(theAreaDrawn!=null){
-            rg.setColor(Color.darkGray);
-            rg.draw(theAreaDrawn);
+            rg.setColor(Color.lightGray);
+            //rg.draw(theAreaDrawn);
 
             if(selectedTrans!=null){
-                rg.setColor(Color.green);
-                rg.draw(selectedTrans.getArea());
+                rg.setColor(Color.black);
+                rg.fill(selectedTrans.getArea());
             }
 
 
