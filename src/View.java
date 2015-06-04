@@ -224,6 +224,7 @@ public class View extends Panel
 
     public void start(){
         addMouseWheelListener(this);
+        addMouseMotionListener(this);
         addKeyListener(this);
         render =  new BufferedImage(screenwidth, screenheight, BufferedImage.TYPE_INT_RGB); //createImage(screenwidth, screenheight);
         rg = (Graphics2D)render.getGraphics();
@@ -287,9 +288,8 @@ public class View extends Panel
 
             if(selectedTrans!=null){
                 rg.setColor(Color.black);
-                rg.fill(selectedTrans.getArea());
+                rg.fill(selectedTrans.myNParent(selectedTrans.generationsBeforeMe()*mousey/512).getArea());
             }
-
 
             rg.setColor(Color.red);
             //TODO1
@@ -365,6 +365,8 @@ public class View extends Panel
     @Override
     public void mouseMoved(MouseEvent e) {
         //aJTable.rowAtPoint(e.getPoint());
+        mousex = e.getX();
+        mousey = e.getY();
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {

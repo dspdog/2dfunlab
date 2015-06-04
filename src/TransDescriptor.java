@@ -1,8 +1,10 @@
 import javax.swing.table.AbstractTableModel;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Created by user on 5/21/2015.
@@ -15,6 +17,8 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     int famNum;
     long myId = -1;
     Area myArea= null;
+
+    Date myTime = new Date();
 
     public Evolution evolution;
 
@@ -131,7 +135,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     public static class TableModel extends AbstractTableModel {
 
         public ArrayList<TransDescriptor> descs;
-        private String[] columnNames= {"generation", "famNum", "score", "id", "attempts"};
+        private String[] columnNames= {"generation", "famNum", "score", "id", "attempts", "time"};
 
         public TransDescriptor selected=null;
 
@@ -182,6 +186,8 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
                     return desc.myId;
                 case 4:
                     return desc.attempts;
+                case 5:
+                    return new SimpleDateFormat("h:mm:ss a yyyy-MM-dd ").format(desc.myTime);
             }
             return "";
         }

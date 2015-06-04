@@ -11,6 +11,9 @@ import java.util.Random;
  */
 public class Evolution {
 
+    int DEPTH = 4; //iterations
+    float MAX_ATTEMPTS = 200f;
+
     int generations = 0;
     boolean resetShape = true;
     String scoreString = "";
@@ -109,7 +112,7 @@ public class Evolution {
 
         trans = desc.trans;
 
-        float max = 50f;
+        float max = (float)Math.abs(rnd.nextGaussian())*MAX_ATTEMPTS;
         for(int attempt = 0; attempt<max; attempt++){
             if(scoreList.size()>10)
             desc = scoreList.get(0); //using elements other than #1 doesnt converge as well
@@ -173,20 +176,24 @@ public class Evolution {
 
     static void testDerivTransforms(float scale, TransDescriptor parentTransform){
         for(int i=0; i<parentTransform.trans.size(); i++){
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, scale, 0f, 0f,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, scale, 0f,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, scale, 0f, 0f,0f,0f,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, scale, 0f,0f,0f,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, scale,0f,0f,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,scale,0f,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,0f,scale,0f, i));
+            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,0f,0f,scale, i));
 
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, scale,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,scale, i));
-
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale, 0f,0f,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, scale,0f,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, scale, 0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, scale));
-
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale, 0f,0f,0f,0f,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, scale,0f,0f,0f,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, scale, 0f,0f,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, scale,0f,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, 0f,scale,0f));
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, 0f,0f,scale));
             float rnd = (float)Math.random();
             float rnd2 = (float)Math.random();
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd), scale * rnd2, scale * (1 - rnd2)));
+            float rnd3 = (float)Math.random();
+            float rnd4 = (float)Math.random();
+            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd), scale * rnd2, scale * (1 - rnd2), scale * rnd3, scale * rnd4));
         }
     }
 
@@ -194,7 +201,7 @@ public class Evolution {
 
         //TODO place "limits" on transform strength
 
-        theArea = this.buildTree(4, new AffineTransform(), theShape, _trans);
+        theArea = this.buildTree(DEPTH, new AffineTransform(), theShape, _trans);
 
         double startArea = MyAreaUtils.getAreaArea(theArea);
         scaleDown = (float)Math.sqrt(targetArea / startArea);
