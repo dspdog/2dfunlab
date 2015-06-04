@@ -111,11 +111,9 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
         }
         else{
             attempts++;
-            if(attempts>20)
-            score*=0.9999d;
-            //if(attempts>200){
-            //    Evolution.deleteFromGraph(this);
-            //}
+            //staleness limiter:
+            // if(attempts>20)
+            //score*=0.9999d;
         }
     }
 

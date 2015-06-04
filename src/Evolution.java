@@ -80,7 +80,7 @@ public class Evolution {
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(13);
+        theShape = MyPolygonUtils.NGon(17);
 
         int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
 
