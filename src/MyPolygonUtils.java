@@ -1,11 +1,5 @@
-import org.poly2tri.geometry.polygon.PolygonPoint;
-import org.poly2tri.geometry.polygon.Polygon;
 
 import java.awt.*;
-import java.awt.geom.Area;
-import java.awt.geom.Line2D;
-import java.util.ArrayList;
-
 /**
  * Created by user on 5/9/2015.
  */
@@ -27,17 +21,4 @@ public class MyPolygonUtils {
         return p;
     }
 
-    public static Polygon poly2P2TPolygon( Polygon2D p ) {
-        int n = p.npoints;
-
-        ArrayList<PolygonPoint> points = new ArrayList<>();
-        for( int i=0; i<n; i++ )
-        {
-            points.add(new PolygonPoint(p.xpoints[i],p.ypoints[i]));
-        }
-
-        Polygon poly = new Polygon(points);
-
-        return poly;
-    }
 }
