@@ -1,3 +1,6 @@
+import org.poly2tri.Poly2Tri;
+import org.poly2tri.geometry.polygon.Polygon;
+
 import javax.swing.table.AbstractTableModel;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -17,6 +20,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     int famNum;
     long myId = -1;
     Area myArea= null;
+    Polygon myPolygon = null;
 
     Date myTime = new Date();
 
@@ -34,6 +38,10 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
             double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
             myArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
         }
+
+        //myPolygon = MyAreaUtils.Area2P2TPoly(myArea);
+        //Poly2Tri.triangulate(myPolygon);
+
         return myArea;
     }
 

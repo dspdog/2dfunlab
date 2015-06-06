@@ -11,8 +11,9 @@ import java.util.Random;
  */
 public class Evolution {
 
-    int DEPTH = 4; //iterations
+    int DEPTH = 3; //iterations
     float MAX_ATTEMPTS = 200f;
+    int NUM_TRANS = 2;
 
     int generations = 0;
     boolean resetShape = true;
@@ -82,7 +83,7 @@ public class Evolution {
         theSubArea = new Area();
         theShape = MyPolygonUtils.NGon(17);
 
-        int numberOfTransforms = 2; // = number of control points/ affines tranforms to choose from
+        int numberOfTransforms = NUM_TRANS; // = number of control points/ affines tranforms to choose from
 
         float startScale = 0.00f; //zero = no bias for upper-most parent
 
@@ -197,7 +198,7 @@ public class Evolution {
         }
     }
 
-    double getScore(ArrayList<AffineTransform> _trans){//TODO return area along with score!
+    double getScore(ArrayList<AffineTransform> _trans){//TODO return area along with score! -- change double --> TransDescriptor
 
         //TODO place "limits" on transform strength
 
