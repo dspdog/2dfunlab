@@ -36,11 +36,12 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
             myArea = evolution.buildTree(4, new AffineTransform(), evolution.theShape, trans);
             double startArea = MyAreaUtils.getAreaArea(myArea);
             double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
-            myArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
-        }
+            myArea.transform(AffineTransform.getScaleInstance(scaleDown, scaleDown));
 
-        //myPolygon = MyAreaUtils.Area2P2TPoly(myArea);
-        //Poly2Tri.triangulate(myPolygon);
+            System.out.println(MyGeoUtils.triangulate(myArea).size() + " tris");
+            //myPolygon = MyAreaUtils.Area2P2TPoly(myArea);
+            //Poly2Tri.triangulate(myPolygon);
+        }
 
         return myArea;
     }

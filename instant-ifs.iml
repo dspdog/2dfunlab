@@ -10,5 +10,8 @@
     <orderEntry type="library" exported="" name="poly2tri-core-0.1.1-SNAPSHOT" level="application" />
     <orderEntry type="library" name="poly2tri" level="project" />
     <orderEntry type="library" name="slf4j-api-1.7.12" level="project" />
+    <orderEntry type="library" name="slf4j-nop-1.7.12" level="project" />
+    <orderEntry type="library" name="slf4j-simple-1.7.12-sources" level="project" />
+    <orderEntry type="library" name="acme" level="project" />
   </component>
 </module>

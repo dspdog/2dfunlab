@@ -1,4 +1,6 @@
 
+import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -289,6 +291,8 @@ public class View extends Panel
             if(selectedTrans!=null){
                 rg.setColor(Color.black);
                 rg.fill(selectedTrans.myNParent(selectedTrans.generationsBeforeMe()*mousey/512).getArea());
+
+                //ArrayList<DelaunayTriangle> tris = (ArrayList<DelaunayTriangle>) selectedTrans.myPolygon.getTriangles();
             }
 
             rg.setColor(Color.red);
@@ -302,11 +306,9 @@ public class View extends Panel
     }
 
     /*
-
     public Area buildTree(Shape _theShape, AffineTransform atAccum, ArrayList<Integer> depthsList){ //new ArrayList<Integer>(listA);
         //TODO depth per-transform: (much slower)
         Area result = new Area(atAccum.createTransformedShape(_theShape));
-
         int numTrans = depthsList.size();
 
         for(int i=0; i<numTrans; i++){
@@ -316,10 +318,8 @@ public class View extends Panel
                 result.add(buildTree(_theShape, MyTransformUtils.compose((AffineTransform)atAccum.clone(), trans.get(i)), copyList));
             }
         }
-
         return result;
     }
-
      */
 
     public void clearframe(){

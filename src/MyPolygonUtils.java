@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class MyPolygonUtils {
 
-    static public int worldScale = 2000;
+    static public int worldScale = 2000000;
     public static Shape NGon(int N){ //http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawaPolygon.htm
         float radius = worldScale;
         float x = 0;
@@ -27,17 +27,14 @@ public class MyPolygonUtils {
         return p;
     }
 
-    public static Polygon poly2P2TPolygon( java.awt.Polygon p )
-    {
+    public static Polygon poly2P2TPolygon( Polygon2D p ) {
         int n = p.npoints;
 
-        //PolygonPoint[]
         ArrayList<PolygonPoint> points = new ArrayList<>();
         for( int i=0; i<n; i++ )
         {
             points.add(new PolygonPoint(p.xpoints[i],p.ypoints[i]));
         }
-
 
         Polygon poly = new Polygon(points);
 

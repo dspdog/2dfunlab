@@ -74,10 +74,10 @@ public class MyAreaUtils {
     public static org.poly2tri.geometry.polygon.Polygon Area2P2TPoly(Area a){
         ArrayList<Line2D.Double> areaSegments = MyAreaUtils.getAreaSegments(a);
 
-        Polygon p = new Polygon();
+        Polygon2D p = new Polygon2D();
 
         for (Line2D segment : areaSegments) {
-            p.addPoint((int)segment.getX1(),(int)segment.getY1());
+            p.addPoint((float)(segment.getX1()+Math.random()*0.0000001f),(float)(segment.getY1()+Math.random()*0.0000001f));
         }
 
         return MyPolygonUtils.poly2P2TPolygon(p);
