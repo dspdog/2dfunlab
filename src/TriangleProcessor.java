@@ -14,9 +14,9 @@ public class TriangleProcessor {
 
     //public final ArrayList<Triangle> triangles = new ArrayList<>();
     public final ArrayList<Point2D> vertsList = new ArrayList<>();
-
+    public final ArrayList<Triangle> trisList = new ArrayList<>();
     public final HashMap<String, Point2D> vertsMap = new HashMap<>();
-    public final HashMap<String, HashSet<Integer>> vertToTriangleSet = new HashMap<>();
+    public final HashMap<String, HashSet<Triangle>> vertToTriangleSet = new HashMap<>();
 
     public void processTriangles(ArrayList<Shape> triangles){
         vertsNonUnique = 0;
@@ -24,14 +24,14 @@ public class TriangleProcessor {
         polys = 0;
 
         vertsList.clear();
-        //this.triangles.clear();
         vertsMap.clear();
-
-        int triangleIndex = 0;
 
         //building vertex-index list....
         for(Shape triangleShape : triangles){
-            for(Point2D vertex : MyPolygonUtils.shape2Pts(triangleShape)){
+            Triangle tri = new Triangle(triangleShape);
+            trisList.add(tri);
+
+            for(Point2D vertex : tri.myVerts){
                 vertsNonUnique++;
 
                 String vertexString = getVertexString(vertex);
@@ -41,35 +41,41 @@ public class TriangleProcessor {
                     //PUTTING UNIQUE VERTS INTO ARRAY...
                     vertsUnique++;
                     vertsList.add(vertex);
-                    vertToTriangleSet.put(vertexString, new HashSet<Integer>());
+
+                    HashSet<Triangle> hash = new HashSet<Triangle>();
+                    hash.add(tri);
+                    vertToTriangleSet.put(vertexString, hash);
                 }else{
-                    vertToTriangleSet.get(vertexString).add(new Integer(triangleIndex));
+                    vertToTriangleSet.get(vertexString).add(tri);
                 }
             }
+
             polys++;
-            triangleIndex++;
         }
 
-        //GETTING TRIS, ADDING TO ARRAY...
-        /*for(Shape poly : csg){
-            int size = poly.vertsList.size();
-            for(int v = 1; v < size - 1; v++) {
-                Triangle triangle = new Triangle(
-                        vertsMap.get(getVertexString(convertCSGVert2myVert(poly.vertsList.get(0)))),
-                        vertsMap.get(getVertexString(convertCSGVert2myVert(poly.vertsList.get(v)))),
-                        vertsMap.get(getVertexString(convertCSGVert2myVert(poly.vertsList.get(v+1))))
-                );
-                if(triangle.myAreaSquared()>0){
-                    //building edges
-                    triangle.verts[0].addNext(triangle.verts[1]).addTriangle(triangle);
-                    triangle.verts[1].addNext(triangle.verts[2]).addTriangle(triangle);
-                    triangle.verts[2].addNext(triangle.verts[0]).addTriangle(triangle);
-                    triangle.getNormal();
-                    triangle.getArea();
-                    triangles.add(triangle);
-                }
+        for(Triangle tri : trisList){tri.updateNeighbors();}
+    }
+
+    public class Triangle{
+        HashSet<Triangle> myVertNeighbors = new HashSet<Triangle>();
+        HashSet<Triangle> myFaceNeighbors = new HashSet<Triangle>();
+        ArrayList<Point2D> myVerts = new ArrayList<>();
+        Shape myShape;
+
+        public Triangle(Shape shape){
+            myShape = shape;
+            myVerts = MyPolygonUtils.shape2Pts(shape);
+        }
+
+        public void updateNeighbors(){
+            for(Point2D vert : myVerts){
+                myVertNeighbors.addAll(vertToTriangleSet.get(getVertexString(vert)));
             }
-        }*/
+
+            for(Triangle neighbor : myVertNeighbors){
+                //TODO check if this neighbor shares 2 verts w this triangle
+            }
+        }
     }
 
     public String getVertexString(Point2D vertex){

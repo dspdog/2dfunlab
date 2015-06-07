@@ -17,13 +17,18 @@ public class MyAreaUtils {
     }
 
     public static class TriangleOrganizer {
+        public ArrayList<Shape> full= new ArrayList<>();
         public ArrayList<Shape> internal= new ArrayList<>();
         public ArrayList<Shape> external = new ArrayList<>();
         public HashSet<Shape> internalMap = new HashSet<>();
         public HashSet<Shape> externalMap = new HashSet<>();
+
+        public TriangleProcessor tp;
+
         public TriangleOrganizer(Area holder, ArrayList<Shape> shapes){
             for(Shape s: shapes){
-                if(numPts(s)==3)
+                if(numPts(s)==3){
+                    full.add(s);
                     if(holder.contains(computeCenter(s))){
                         internal.add(s);
                         internalMap.add(s);
@@ -31,7 +36,11 @@ public class MyAreaUtils {
                         external.add(s);
                         externalMap.add(s);
                     }
+                }
             }
+
+            tp = new TriangleProcessor();
+            tp.processTriangles(full);
         };
     }
 
