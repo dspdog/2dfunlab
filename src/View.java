@@ -281,6 +281,7 @@ public class View extends Panel
         rg.setTransform(cameraTransform);
         rg.setStroke(new BasicStroke(1.0f / (float)zoom));
 
+        Rectangle theRect = new Rectangle((int)centerPt.getX(),(int)centerPt.getY(),20,20);
 
         if(theAreaDrawn!=null){
             rg.setColor(Color.lightGray);
@@ -296,14 +297,16 @@ public class View extends Panel
                 rg.setColor(Color.gray);
 
                 for(Shape s : transToShow.organizedTriangles.internal){
-                    if(s.contains(realMousePt)){
-                        rg.setColor(Color.red);
+                    if(s.intersects(theRect)){
+                        rg.setColor(Color.lightGray);
                         rg.fill(s);
-                        rg.setColor(Color.orange);
+                        transToShow.organizedTriangles.tp.shape2Tri.get(s).putPressure(1.0f, System.currentTimeMillis()+"OK");
+
+                        /*rg.setColor(Color.orange);
                         for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){
                             if(n.isInternal)
                             rg.fill(n.myShape);
-                        }
+                        }*/
 
                     }else{
                         rg.setColor(Color.gray);
@@ -316,7 +319,7 @@ public class View extends Panel
             rg.setColor(Color.red);
         }
 
-        rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
+        rg.draw(theRect);
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 

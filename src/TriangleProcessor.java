@@ -18,11 +18,11 @@ public class TriangleProcessor {
     public final HashMap<String, Point2D> vertsMap = new HashMap<>();
     public final HashMap<String, HashSet<Triangle>> vertToTriangleSet = new HashMap<>();
     public final HashMap<Shape,Triangle> shape2Tri = new HashMap<>();
-    public final HashSet<Shape> internalMap = new HashSet<>();
+    public final HashSet<Shape> internalShapes = new HashSet<>();
 
-    public void processTriangles(ArrayList<Shape> triangles, HashSet<Shape> _internalMap){
+    public void processTriangles(ArrayList<Shape> shapes, HashSet<Shape> _internalShapes){
 
-        internalMap.addAll(_internalMap);
+        internalShapes.addAll(_internalShapes);
 
         vertsNonUnique = 0;
         vertsUnique = 0;
@@ -32,7 +32,7 @@ public class TriangleProcessor {
         vertsMap.clear();
 
         //building vertex-index list....
-        for(Shape triangleShape : triangles){
+        for(Shape triangleShape : shapes){
             Triangle tri = new Triangle(triangleShape);
             shape2Tri.put(triangleShape,tri);
             trisList.add(tri);
@@ -67,13 +67,30 @@ public class TriangleProcessor {
         HashSet<Triangle> myFaceNeighbors = new HashSet<Triangle>();
         ArrayList<Point2D> myVerts = new ArrayList<>();
         HashSet<String> myVertsSet = new HashSet<>();
+
+        HashMap<String, Double> pressures = new HashMap<>();
+
         boolean isInternal = false;
         Shape myShape;
 
         public Triangle(Shape shape){
             myShape = shape;
             myVerts = MyPolygonUtils.shape2Pts(shape);
-            isInternal = internalMap.contains(myShape);
+            isInternal = internalShapes.contains(myShape);
+        }
+
+        public void putPressure(double voltage, String sourceName){
+            if(pressures.get(sourceName)==null){
+                pressures.put(sourceName, new Double(voltage));
+            }
+
+            for(Triangle neighbor : myFaceNeighbors){
+                double partialVoltage = voltage; //TODO get partial voltage
+
+                if(neighbor.pressures.get(sourceName)==null){
+                    neighbor.putPressure(partialVoltage,sourceName);
+                }
+            }
         }
 
         public void updateNeighbors(){
