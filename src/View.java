@@ -299,6 +299,12 @@ public class View extends Panel
                     if(s.contains(realMousePt)){
                         rg.setColor(Color.red);
                         rg.fill(s);
+                        rg.setColor(Color.orange);
+                        for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){
+                            if(n.isInternal)
+                            rg.fill(n.myShape);
+                        }
+
                     }else{
                         rg.setColor(Color.gray);
                         rg.draw(s);

@@ -17,8 +17,13 @@ public class TriangleProcessor {
     public final ArrayList<Triangle> trisList = new ArrayList<>();
     public final HashMap<String, Point2D> vertsMap = new HashMap<>();
     public final HashMap<String, HashSet<Triangle>> vertToTriangleSet = new HashMap<>();
+    public final HashMap<Shape,Triangle> shape2Tri = new HashMap<>();
+    public final HashSet<Shape> internalMap = new HashSet<>();
 
-    public void processTriangles(ArrayList<Shape> triangles){
+    public void processTriangles(ArrayList<Shape> triangles, HashSet<Shape> _internalMap){
+
+        internalMap.addAll(_internalMap);
+
         vertsNonUnique = 0;
         vertsUnique = 0;
         polys = 0;
@@ -29,6 +34,7 @@ public class TriangleProcessor {
         //building vertex-index list....
         for(Shape triangleShape : triangles){
             Triangle tri = new Triangle(triangleShape);
+            shape2Tri.put(triangleShape,tri);
             trisList.add(tri);
 
             for(Point2D vertex : tri.myVerts){
@@ -61,12 +67,13 @@ public class TriangleProcessor {
         HashSet<Triangle> myFaceNeighbors = new HashSet<Triangle>();
         ArrayList<Point2D> myVerts = new ArrayList<>();
         HashSet<String> myVertsSet = new HashSet<>();
-
+        boolean isInternal = false;
         Shape myShape;
 
         public Triangle(Shape shape){
             myShape = shape;
             myVerts = MyPolygonUtils.shape2Pts(shape);
+            isInternal = internalMap.contains(myShape);
         }
 
         public void updateNeighbors(){
@@ -81,7 +88,7 @@ public class TriangleProcessor {
                 int sharedVerts = 0;
 
                 for(Point2D vert : neighbor.myVerts){
-                    if(myVertsSet.contains(vert)){
+                    if(myVertsSet.contains(getVertexString(vert))){
                         sharedVerts++;
                     }
                 }

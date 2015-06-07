@@ -40,7 +40,7 @@ public class MyAreaUtils {
             }
 
             tp = new TriangleProcessor();
-            tp.processTriangles(full);
+            tp.processTriangles(full, internalMap );
         };
     }
 
