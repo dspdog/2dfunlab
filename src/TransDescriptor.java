@@ -35,16 +35,17 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
 
     MyAreaUtils.TriangleOrganizer organizedTriangles;
 
-    public Area getArea(){
-        if(myArea==null){
+    public Area getArea(Shape extra){
+        //TODO prevent repeat calculations
+        //if(myArea==null){
             myArea = evolution.buildTree(4, new AffineTransform(), evolution.theShape, trans);
             double startArea = MyAreaUtils.getAreaArea(myArea);
             double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
             myArea.transform(AffineTransform.getScaleInstance(scaleDown, scaleDown));
 
-            myTriangles = MyGeoUtils.triangulate(myArea, 4f);
+            myTriangles = MyGeoUtils.triangulate(myArea, 4f, extra);
             organizedTriangles = new MyAreaUtils.TriangleOrganizer(myArea, myTriangles);
-        }
+        //}
 
         return myArea;
     }

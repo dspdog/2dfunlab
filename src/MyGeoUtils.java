@@ -17,16 +17,22 @@ public class MyGeoUtils {
 
     private static final Geometry[] EMPTY_GEOM_ARRAY = new Geometry[0];
 
-    public static ArrayList<Shape> triangulate(Area area, float edgeSegLength){ //TODO triangulate w edges not just points
+    public static ArrayList<Shape> triangulate(Area area, float edgeSegLength, Shape extraSegs){ //TODO triangulate w edges not just points
         GeometryFactory gf = new GeometryFactory();
 
         final ArrayList<Coordinate> points = new ArrayList<Coordinate>();
         //final ArrayList<Coordinate> points2 = new ArrayList<Coordinate>();
         ArrayList<Line2D.Double> lines =  MyAreaUtils.getAreaSegmentsShort(area, edgeSegLength);
+        ArrayList<Line2D.Double> lines2 =  MyAreaUtils.getAreaSegmentsShort(new Area(extraSegs), edgeSegLength);
 
         for(Line2D line : lines){
             points.add(new Coordinate(line.getX1(), line.getY1()));
            //points2.add(new Coordinate(line.getX1()+Math.random()*100-50f, line.getY1()+Math.random()*100-50f));
+        }
+
+        for(Line2D line : lines2){
+            points.add(new Coordinate(line.getX1(), line.getY1()));
+            //points2.add(new Coordinate(line.getX1()+Math.random()*100-50f, line.getY1()+Math.random()*100-50f));
         }
 
         //points.add(new Coordinate(lines.get(0).getX1(), lines.get(0).getY1())); //close the shape

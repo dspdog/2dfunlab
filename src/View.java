@@ -291,7 +291,7 @@ public class View extends Panel
                 rg.setColor(Color.black);
 
                 TransDescriptor transToShow = selectedTrans.myNParent(selectedTrans.generationsBeforeMe()*mousey/512);
-                Area areaToDraw = transToShow.getArea();
+                Area areaToDraw = transToShow.getArea(theRect);
 
                 rg.fill(areaToDraw);
                 rg.setColor(Color.gray);
@@ -300,7 +300,8 @@ public class View extends Panel
                     if(s.intersects(theRect)){
                         rg.setColor(Color.lightGray);
                         rg.fill(s);
-                        transToShow.organizedTriangles.tp.shape2Tri.get(s).putPressure(1.0f, System.currentTimeMillis()+"OK");
+                        TriangleProcessor.Triangle theTri = transToShow.organizedTriangles.tp.shape2Tri.get(s);
+                        theTri.putPressure(1.0f, theTri, theTri);
 
                         /*rg.setColor(Color.orange);
                         for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){

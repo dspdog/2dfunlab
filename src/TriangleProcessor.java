@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,8 +69,9 @@ public class TriangleProcessor {
         ArrayList<Point2D> myVerts = new ArrayList<>();
         HashSet<String> myVertsSet = new HashSet<>();
 
-        HashMap<String, Double> pressures = new HashMap<>();
+        HashMap<Triangle, HashMap<Triangle, Double>> pressures = new HashMap<>();
 
+        double fullPressure = 0;
         boolean isInternal = false;
         Shape myShape;
 
@@ -77,20 +79,57 @@ public class TriangleProcessor {
             myShape = shape;
             myVerts = MyPolygonUtils.shape2Pts(shape);
             isInternal = internalShapes.contains(myShape);
+            fullPressure=0;
         }
 
-        public void putPressure(double voltage, String sourceName){
-            if(pressures.get(sourceName)==null){
-                pressures.put(sourceName, new Double(voltage));
+        public double getTotalPressure(){
+            return 0d; //TODO 
+        }
+
+        public void putPressure(double voltage, Triangle originalSourceTriangle, Triangle comingFrom){ //coming from is the neighbor providing this contribution, origSource is starting location for this voltage source
+            if(pressures.get(comingFrom)==null){
+                HashMap<Triangle, Double> thePressure = new HashMap<>();
+                pressures.put(comingFrom, thePressure);
             }
 
-            for(Triangle neighbor : myFaceNeighbors){
-                double partialVoltage = voltage; //TODO get partial voltage
+            if(pressures.get(comingFrom).get(originalSourceTriangle)==null){
+                pressures.get(comingFrom).put(originalSourceTriangle, new Double(voltage));
+                fullPressure+=voltage;
 
-                if(neighbor.pressures.get(sourceName)==null){
-                    neighbor.putPressure(partialVoltage,sourceName);
+                double availableSharedFacesLength = 0;
+
+                for(Triangle neighbor : myFaceNeighbors){
+                    if(neighbor!=comingFrom){
+                        availableSharedFacesLength+=getSharedFaceLength(neighbor); // TODO update -- internal vs external
+                    }
+                }
+
+                for(Triangle neighbor : myFaceNeighbors){
+                    if(neighbor!=comingFrom && neighbor.isInternal){
+                        double partialVoltage = voltage*getSharedFaceLength(neighbor)/availableSharedFacesLength;
+                        neighbor.putPressure(partialVoltage, originalSourceTriangle, this);
+                    }
+                }
+            }else{
+                //if we are here then this triangle has already been influenced by this source from this neighbor
+                //pressures.get(comingFrom).put(sourceName, new Double(pressures.get(comingFrom).get(sourceName)+voltage));
+            }
+        }
+
+        public double getSharedFaceLength(Triangle neighbor){
+            Point2D p1=null;
+            Point2D p2=null;
+            for(Point2D vert : neighbor.myVerts){
+                if(myVertsSet.contains(getVertexString(vert))){
+                    if(p1==null){
+                        p1=vert;
+                    }else{
+                        p2=vert;
+                    }
                 }
             }
+
+            return p1.distance(p2);
         }
 
         public void updateNeighbors(){
@@ -114,6 +153,14 @@ public class TriangleProcessor {
                     myFaceNeighbors.add(neighbor);
                 }
             }
+        }
+
+        public String getTriangleString(){
+            String str= "";
+            for(Point2D pt : myVerts){
+                str+=getVertexString(pt);
+            }
+            return str;
         }
     }
 
