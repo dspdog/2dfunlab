@@ -1,9 +1,11 @@
 import java.awt.*;
-import java.awt.geom.Area;
-import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.util.ArrayList;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 public class MyAreaUtils {
 
@@ -14,6 +16,148 @@ public class MyAreaUtils {
 
     static double getAreaArea(Area area){
         return polygonArea(getAreaSegments(area));
+    }
+
+    static public ArrayList<Shape> pluckInternal(Area holder, ArrayList<Shape> shapes){
+        ArrayList<Shape> res = new ArrayList<>();
+        for(Shape s: shapes){
+            if(numPts(s)==3)
+            if(holder.contains(computeCenter(s))){res.add(s);}
+        }
+        return res;
+    }
+
+    public static int numPts(Shape shape){
+        PathIterator pi = shape.getPathIterator(null);
+        double coords[] = new double[6];
+        int numPoints = 0;
+        while (!pi.isDone()){
+            int s = pi.currentSegment(coords);
+            switch (s) {
+                case PathIterator.SEG_MOVETO:
+                    numPoints++;
+                    break;
+
+                case PathIterator.SEG_LINETO:
+                    numPoints++;
+                    break;
+
+                case PathIterator.SEG_CLOSE:
+                    // Ignore
+                    break;
+            }
+            pi.next();
+        }
+
+        return numPoints;
+    }
+
+    public static Point2D computeCenter(Shape shape)//http://stackoverflow.com/questions/21973875/java-pathiterator-how-do-i-accurately-calculate-center-of-shape-object
+    {
+        PathIterator pi = shape.getPathIterator(null);
+        double coords[] = new double[6];
+        double sumX = 0;
+        double sumY = 0;
+        int numPoints = 0;
+        while (!pi.isDone()){
+            int s = pi.currentSegment(coords);
+            switch (s) {
+                case PathIterator.SEG_MOVETO:
+                    sumX += coords[0];
+                    sumY += coords[1];
+                    numPoints++;
+                    break;
+
+                case PathIterator.SEG_LINETO:
+                    sumX += coords[0];
+                    sumY += coords[1];
+                    numPoints++;
+                    break;
+
+                case PathIterator.SEG_CLOSE:
+                    // Ignore
+                    break;
+            }
+            pi.next();
+        }
+        double x = sumX / numPoints;
+        double y = sumY / numPoints;
+
+        //if(numPoints!=3){
+        //    System.out.println(numPoints + " pts?");
+        //}
+        return new Point2D.Double(x,y);
+    }
+
+    static public ArrayList<Line2D.Double> lineList(Line2D.Double line, float len){ //TODO chop line up into segs of length len
+        ArrayList<Line2D.Double> res = new ArrayList<>();
+        //res.add(line);
+
+        Point2D startPt = line.getP1();
+        Point2D endPt = line.getP2();
+
+        while (startPt.distance(endPt)>len){
+            Point2D shiftedStartPt = shiftedTowards(startPt,endPt,len);
+            res.add(new Line2D.Double(startPt,shiftedStartPt));
+            startPt=shiftedStartPt;
+        }
+
+        res.add(new Line2D.Double(startPt,endPt));
+
+        return res;
+    }
+
+    static public Point2D shiftedTowards(Point2D mover, Point2D dest, float shiftDist){
+        double fracDist = shiftDist/mover.distance(dest);
+        return new Point2D.Double(mover.getX()-(mover.getX()-dest.getX())*fracDist, mover.getY()-(mover.getY()-dest.getY())*fracDist);
+    }
+
+    static public ArrayList<Line2D.Double> getAreaSegmentsShort(Area area, float linesLen){
+        ArrayList<double[]> areaPoints = new ArrayList<double[]>();
+        ArrayList<Line2D.Double> areaSegments = new ArrayList<Line2D.Double>();
+        double[] coords = new double[6];
+
+        for (PathIterator pi = area.getPathIterator(null); !pi.isDone(); pi.next()) {
+            // The type will be SEG_LINETO, SEG_MOVETO, or SEG_CLOSE
+            // Because the Area is composed of straight lines
+            int type = pi.currentSegment(coords);
+            // We record a double array of {segment type, x coord, y coord}
+            double[] pathIteratorCoords = {type, coords[0], coords[1]};
+            areaPoints.add(pathIteratorCoords);
+        }
+
+        double[] start = new double[3]; // To record where each polygon starts
+
+        for (int i = 0; i < areaPoints.size(); i++) {
+            // If we're not on the last point, return a line from this point to the next
+            double[] currentElement = areaPoints.get(i);
+
+            // We need a default value in case we've reached the end of the ArrayList
+            double[] nextElement = {-1, -1, -1};
+            if (i < areaPoints.size() - 1) {
+                nextElement = areaPoints.get(i + 1);
+            }
+
+            // Make the lines
+            if (currentElement[0] == PathIterator.SEG_MOVETO) {
+                start = currentElement; // Record where the polygon started to close it later
+            }
+
+            if (nextElement[0] == PathIterator.SEG_LINETO) {
+                areaSegments.addAll(lineList(new Line2D.Double(
+                        currentElement[1], currentElement[2],
+                        nextElement[1], nextElement[2]
+                ), linesLen));
+            } else if (nextElement[0] == PathIterator.SEG_CLOSE) {
+                areaSegments.addAll(lineList(new Line2D.Double(
+                                currentElement[1], currentElement[2],
+                                start[1], start[2]
+                        ), linesLen)
+                );
+            }
+        }
+        // areaSegments now contains all the line segments
+        return areaSegments;
     }
 
     //http://stackoverflow.com/questions/8144156/using-pathiterator-to-return-all-line-segments-that-constrain-an-area

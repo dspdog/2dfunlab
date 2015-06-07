@@ -1,7 +1,6 @@
-import org.poly2tri.Poly2Tri;
-import org.poly2tri.geometry.polygon.Polygon;
 
 import javax.swing.table.AbstractTableModel;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.text.SimpleDateFormat;
@@ -20,7 +19,6 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     int famNum;
     long myId = -1;
     Area myArea= null;
-    Polygon myPolygon = null;
 
     Date myTime = new Date();
 
@@ -31,6 +29,9 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     TransDescriptor parent;
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
 
+    ArrayList<Shape> myTriangles = new ArrayList<>();
+    ArrayList<Shape> myInternalTriangles = new ArrayList<>();
+
     public Area getArea(){
         if(myArea==null){
             myArea = evolution.buildTree(4, new AffineTransform(), evolution.theShape, trans);
@@ -38,9 +39,8 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
             double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
             myArea.transform(AffineTransform.getScaleInstance(scaleDown, scaleDown));
 
-            System.out.println(MyGeoUtils.triangulate(myArea).size() + " tris");
-            //myPolygon = MyAreaUtils.Area2P2TPoly(myArea);
-            //Poly2Tri.triangulate(myPolygon);
+            myTriangles = MyGeoUtils.triangulate(myArea, 4f);
+            myInternalTriangles = MyAreaUtils.pluckInternal(myArea, myTriangles);
         }
 
         return myArea;

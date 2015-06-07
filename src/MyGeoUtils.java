@@ -2,54 +2,63 @@
  * Created by user on 6/6/2015.
  */
 
+import com.vividsolutions.jts.awt.ShapeReader;
+import com.vividsolutions.jts.awt.ShapeWriter;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import com.vividsolutions.jts.triangulate.ConformingDelaunayTriangulationBuilder;
+
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import com.vividsolutions.jts.triangulate.ConformingDelaunayTriangulationBuilder;
-
 public class MyGeoUtils {
 
     private static final Geometry[] EMPTY_GEOM_ARRAY = new Geometry[0];
 
-    public static ArrayList<Geometry> triangulate(Area area){ //TODO triangulate w edges not just points
-        final GeometryFactory gf = new GeometryFactory();
+    public static ArrayList<Shape> triangulate(Area area, float edgeSegLength){ //TODO triangulate w edges not just points
+        GeometryFactory gf = new GeometryFactory();
+
         final ArrayList<Coordinate> points = new ArrayList<Coordinate>();
-        ArrayList<Line2D.Double> lines =  MyAreaUtils.getAreaSegments(area);
+        //final ArrayList<Coordinate> points2 = new ArrayList<Coordinate>();
+        ArrayList<Line2D.Double> lines =  MyAreaUtils.getAreaSegmentsShort(area, edgeSegLength);
+
         for(Line2D line : lines){
             points.add(new Coordinate(line.getX1(), line.getY1()));
+           //points2.add(new Coordinate(line.getX1()+Math.random()*100-50f, line.getY1()+Math.random()*100-50f));
         }
 
-        points.add(new Coordinate(lines.get(0).getX1(), lines.get(0).getY1()));
-
-        final Polygon polygon = gf.createPolygon(new LinearRing(new CoordinateArraySequence(points
-                .toArray(new Coordinate[points.size()])), gf), null);
+        //points.add(new Coordinate(lines.get(0).getX1(), lines.get(0).getY1())); //close the shape
+        points.add(points.get(0)); //close the shape
 
         ConformingDelaunayTriangulationBuilder triangulationBuilder =
                 new ConformingDelaunayTriangulationBuilder();
 
-        List<Geometry> constraints =
-                new ArrayList<Geometry>();
 
-        constraints.add(polygon);
+        ArrayList<Geometry> sites = new ArrayList<Geometry>();
+
+        ArrayList<Geometry> constraints = new ArrayList<Geometry>(); //constraints.add(ShapeReader.read(area,0.001,gf)); //doesnt always work...
+        //constraints.add(ShapeReader.read(area, 1, gf));
+        sites.add(new LinearRing(new CoordinateArraySequence(points.toArray(new Coordinate[points.size()])), gf));
 
         triangulationBuilder.setSites(
-                 new GeometryCollection(constraints.toArray(EMPTY_GEOM_ARRAY), gf));
+                new GeometryCollection(sites.toArray(EMPTY_GEOM_ARRAY), gf));
+
         //triangulationBuilder.setConstraints(
         //        new GeometryCollection(constraints.toArray(EMPTY_GEOM_ARRAY), gf));
-        triangulationBuilder.setTolerance(0.01);
+
+        triangulationBuilder.setTolerance(0.00000001);
 
     /* run triangulation */
 
         Geometry triangulationResult = triangulationBuilder.getTriangles(gf);
 
-        ArrayList<Geometry> result = new ArrayList<>();
+        ArrayList<Shape> result = new ArrayList<>();
 
         for(int i=0; i<triangulationResult.getNumGeometries(); i++){
-            result.add(triangulationResult.getGeometryN(i));
+            result.add(new ShapeWriter().toShape(triangulationResult.getGeometryN(i)));
         }
 
         return result;

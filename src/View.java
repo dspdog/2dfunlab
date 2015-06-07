@@ -1,6 +1,4 @@
 
-import org.poly2tri.triangulation.delaunay.DelaunayTriangle;
-
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -290,15 +288,20 @@ public class View extends Panel
 
             if(selectedTrans!=null){
                 rg.setColor(Color.black);
-                rg.fill(selectedTrans.myNParent(selectedTrans.generationsBeforeMe()*mousey/512).getArea());
 
-                //ArrayList<DelaunayTriangle> tris = (ArrayList<DelaunayTriangle>) selectedTrans.myPolygon.getTriangles();
+                TransDescriptor transToShow = selectedTrans.myNParent(selectedTrans.generationsBeforeMe()*mousey/512);
+                Area areaToDraw = transToShow.getArea();
+
+                rg.fill(areaToDraw);
+                rg.setColor(Color.gray);
+                if(transToShow.myTriangles.size()>1){
+                    for(Shape s : transToShow.myInternalTriangles){
+                        rg.draw(s);
+                    }
+                }
             }
 
             rg.setColor(Color.red);
-            //TODO1
-           // if(myEvolution1.theRecordArea!=null)
-           // rg.draw(myEvolution1.theRecordArea);
         }
 
         rg.drawRect((int)centerPt.getX(),(int)centerPt.getY(),20,20);
