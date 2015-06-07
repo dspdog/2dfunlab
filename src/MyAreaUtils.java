@@ -1,11 +1,9 @@
-import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.util.HashSet;
 
 public class MyAreaUtils {
 
@@ -18,25 +16,23 @@ public class MyAreaUtils {
         return polygonArea(getAreaSegments(area));
     }
 
-    static public SplitResult getInternalExternal(Area holder, ArrayList<Shape> shapes){
-        ArrayList<Shape> internal = new ArrayList<>();
-        ArrayList<Shape> external = new ArrayList<>();
-        for(Shape s: shapes){
-            if(numPts(s)==3)
-            if(holder.contains(computeCenter(s))){internal.add(s);}else{external.add(s);}
-        }
-
-        SplitResult res = new SplitResult();
-        res.internal = internal;
-        res.external = external;
-
-        return res;
-    }
-
-    public static class SplitResult{
-        public ArrayList<Shape> internal;
-        public ArrayList<Shape> external;
-        public SplitResult(){};
+    public static class TriangleOrganizer {
+        public ArrayList<Shape> internal= new ArrayList<>();
+        public ArrayList<Shape> external = new ArrayList<>();
+        public HashSet<Shape> internalMap = new HashSet<>();
+        public HashSet<Shape> externalMap = new HashSet<>();
+        public TriangleOrganizer(Area holder, ArrayList<Shape> shapes){
+            for(Shape s: shapes){
+                if(numPts(s)==3)
+                    if(holder.contains(computeCenter(s))){
+                        internal.add(s);
+                        internalMap.add(s);
+                    }else{
+                        external.add(s);
+                        externalMap.add(s);
+                    }
+            }
+        };
     }
 
     public static int numPts(Shape shape){

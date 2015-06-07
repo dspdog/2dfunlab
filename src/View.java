@@ -294,10 +294,9 @@ public class View extends Panel
 
                 rg.fill(areaToDraw);
                 rg.setColor(Color.gray);
-                if(transToShow.myTriangles.size()>1){
-                    for(Shape s : transToShow.myInternalTriangles){
-                        rg.draw(s);
-                    }
+
+                for(Shape s : transToShow.organizedTriangles.internal){
+                    rg.draw(s);
                 }
             }
 

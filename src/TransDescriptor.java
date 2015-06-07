@@ -33,6 +33,8 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     ArrayList<Shape> myExternalTriangles = new ArrayList<>();
     ArrayList<Shape> myInternalTriangles = new ArrayList<>();
 
+    MyAreaUtils.TriangleOrganizer organizedTriangles;
+
     public Area getArea(){
         if(myArea==null){
             myArea = evolution.buildTree(4, new AffineTransform(), evolution.theShape, trans);
@@ -41,10 +43,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
             myArea.transform(AffineTransform.getScaleInstance(scaleDown, scaleDown));
 
             myTriangles = MyGeoUtils.triangulate(myArea, 4f);
-
-            MyAreaUtils.SplitResult intExt = MyAreaUtils.getInternalExternal(myArea, myTriangles);
-            myInternalTriangles=intExt.internal;
-            myExternalTriangles=intExt.external;
+            organizedTriangles = new MyAreaUtils.TriangleOrganizer(myArea, myTriangles);
         }
 
         return myArea;
