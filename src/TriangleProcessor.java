@@ -60,6 +60,8 @@ public class TriangleProcessor {
         HashSet<Triangle> myVertNeighbors = new HashSet<Triangle>();
         HashSet<Triangle> myFaceNeighbors = new HashSet<Triangle>();
         ArrayList<Point2D> myVerts = new ArrayList<>();
+        HashSet<String> myVertsSet = new HashSet<>();
+
         Shape myShape;
 
         public Triangle(Shape shape){
@@ -70,10 +72,23 @@ public class TriangleProcessor {
         public void updateNeighbors(){
             for(Point2D vert : myVerts){
                 myVertNeighbors.addAll(vertToTriangleSet.get(getVertexString(vert)));
+                myVertsSet.add(getVertexString(vert));
             }
 
+            myVertNeighbors.remove(this);
+
             for(Triangle neighbor : myVertNeighbors){
-                //TODO check if this neighbor shares 2 verts w this triangle
+                int sharedVerts = 0;
+
+                for(Point2D vert : neighbor.myVerts){
+                    if(myVertsSet.contains(vert)){
+                        sharedVerts++;
+                    }
+                }
+
+                if(sharedVerts==2){
+                    myFaceNeighbors.add(neighbor);
+                }
             }
         }
     }

@@ -296,7 +296,14 @@ public class View extends Panel
                 rg.setColor(Color.gray);
 
                 for(Shape s : transToShow.organizedTriangles.internal){
-                    rg.draw(s);
+                    if(s.contains(realMousePt)){
+                        rg.setColor(Color.red);
+                        rg.fill(s);
+                    }else{
+                        rg.setColor(Color.gray);
+                        rg.draw(s);
+                    }
+
                 }
             }
 
