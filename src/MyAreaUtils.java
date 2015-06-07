@@ -18,13 +18,25 @@ public class MyAreaUtils {
         return polygonArea(getAreaSegments(area));
     }
 
-    static public ArrayList<Shape> pluckInternal(Area holder, ArrayList<Shape> shapes){
-        ArrayList<Shape> res = new ArrayList<>();
+    static public SplitResult getInternalExternal(Area holder, ArrayList<Shape> shapes){
+        ArrayList<Shape> internal = new ArrayList<>();
+        ArrayList<Shape> external = new ArrayList<>();
         for(Shape s: shapes){
             if(numPts(s)==3)
-            if(holder.contains(computeCenter(s))){res.add(s);}
+            if(holder.contains(computeCenter(s))){internal.add(s);}else{external.add(s);}
         }
+
+        SplitResult res = new SplitResult();
+        res.internal = internal;
+        res.external = external;
+
         return res;
+    }
+
+    public static class SplitResult{
+        public ArrayList<Shape> internal;
+        public ArrayList<Shape> external;
+        public SplitResult(){};
     }
 
     public static int numPts(Shape shape){

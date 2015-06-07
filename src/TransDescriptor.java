@@ -30,6 +30,7 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
     ArrayList<TransDescriptor> children = new ArrayList<TransDescriptor>();
 
     ArrayList<Shape> myTriangles = new ArrayList<>();
+    ArrayList<Shape> myExternalTriangles = new ArrayList<>();
     ArrayList<Shape> myInternalTriangles = new ArrayList<>();
 
     public Area getArea(){
@@ -40,7 +41,10 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
             myArea.transform(AffineTransform.getScaleInstance(scaleDown, scaleDown));
 
             myTriangles = MyGeoUtils.triangulate(myArea, 4f);
-            myInternalTriangles = MyAreaUtils.pluckInternal(myArea, myTriangles);
+
+            MyAreaUtils.SplitResult intExt = MyAreaUtils.getInternalExternal(myArea, myTriangles);
+            myInternalTriangles=intExt.internal;
+            myExternalTriangles=intExt.external;
         }
 
         return myArea;

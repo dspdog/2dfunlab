@@ -1,5 +1,9 @@
 
 import java.awt.*;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+
 /**
  * Created by user on 5/9/2015.
  */
@@ -21,4 +25,30 @@ public class MyPolygonUtils {
         return p;
     }
 
+    public static ArrayList<Point2D> shape2Pts(Shape shape){
+
+        ArrayList<Point2D> pts = new ArrayList<>();
+
+        PathIterator pi = shape.getPathIterator(null);
+        double coords[] = new double[6];
+        while (!pi.isDone()){
+            int s = pi.currentSegment(coords);
+            switch (s) {
+                case PathIterator.SEG_MOVETO:
+                    pts.add(new Point2D.Double(coords[0],coords[1]));
+                    break;
+
+                case PathIterator.SEG_LINETO:
+                    pts.add(new Point2D.Double(coords[0],coords[1]));
+                    break;
+
+                case PathIterator.SEG_CLOSE:
+                    // Ignore
+                    break;
+            }
+            pi.next();
+        }
+
+        return pts;
+    }
 }

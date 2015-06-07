@@ -2,7 +2,6 @@
  * Created by user on 6/6/2015.
  */
 
-import com.vividsolutions.jts.awt.ShapeReader;
 import com.vividsolutions.jts.awt.ShapeWriter;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
@@ -11,8 +10,8 @@ import com.vividsolutions.jts.triangulate.ConformingDelaunayTriangulationBuilder
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.geom.Point2D;
+import java.util.*;
 
 public class MyGeoUtils {
 
