@@ -43,7 +43,7 @@ public class View extends Panel
 
     double zoom = 1.0;
 
-    static int NUMEVOLVERS = 7;
+    static int NUMEVOLVERS = 1;
 
     public ArrayList<Evolution> myEvolutions = new ArrayList<>();
     public static ArrayList<EvolutionThread> myEvolutionThreads = new ArrayList<>();
@@ -294,7 +294,8 @@ public class View extends Panel
                 Area areaToDraw = transToShow.getArea(theRect);
 
                 rg.fill(areaToDraw);
-                rg.setColor(Color.gray);
+
+                /*rg.setColor(Color.gray); //triangles
 
                 for(Shape s : transToShow.organizedTriangles.internal){
                     if(s.intersects(theRect)){
@@ -303,24 +304,25 @@ public class View extends Panel
                         TriangleProcessor.Triangle theTri = transToShow.organizedTriangles.tp.shape2Tri.get(s);
                         theTri.putPressure(1.0f, theTri, theTri);
 
-                        /*rg.setColor(Color.orange);
-                        for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){
-                            if(n.isInternal)
-                            rg.fill(n.myShape);
-                        }*/
+                        //rg.setColor(Color.orange);
+                        //for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){
+                        //    if(n.isInternal)
+                        //    rg.fill(n.myShape);
+                        //}
 
                     }else{
                         rg.setColor(Color.gray);
                         rg.draw(s);
                     }
 
-                }
+                }*/
             }
 
             rg.setColor(Color.red);
         }
 
         rg.draw(theRect);
+        //rg.draw(Evolution._container);
         gr.drawImage(render, 0, 0, screenwidth, screenheight, this);
     }
 

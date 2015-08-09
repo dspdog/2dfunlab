@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,6 +43,9 @@ public class Evolution {
     public Area theRecordArea;
     public Shape theShape;
     public Shape theScaledShape;
+
+    public static Area _container  = new Area(new Ellipse2D.Double(-256,-256,512,512));
+    public Area containerArea; //
 
     public Evolution(){
         scaleDown = 1.0f;
@@ -206,12 +210,22 @@ public class Evolution {
 
         double startArea = MyAreaUtils.getAreaArea(theArea);
         scaleDown = (float)Math.sqrt(targetArea / startArea);
+
+        //System.out.println(scaleDown);
         //treeShape = Evolution.buildTreeShape(1, new AffineTransform(), theShape, trans);
 
         theArea.transform(AffineTransform.getScaleInstance(scaleDown,scaleDown));
         theScaledShape = AffineTransform.getScaleInstance(scaleDown,scaleDown).createTransformedShape(theShape);
 
         double score = MyAreaUtils.getAreaPerimeter(theArea) / MyAreaUtils.getAreaArea(theArea);
+
+        containerArea = new Area(_container);
+        containerArea.intersect(theArea);
+
+        if(theArea.getBounds().getWidth()>512 || theArea.getBounds().getHeight()>512
+                || !theArea.equals(containerArea)
+                || !theArea.isSingular())score = 0;
+
         View.theAreaDrawn = theArea;
         //TODO reduce score according to variance^2
 

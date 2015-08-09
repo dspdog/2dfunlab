@@ -8,7 +8,7 @@ import java.util.HashSet;
 public class MyAreaUtils {
 
     static double getAreaPerimeter(Area area){
-        if(area.getBounds2D().getWidth()>500 || area.getBounds2D().getHeight()>500 || !area.isSingular())return 0; //TODO use max distance instead of width/height
+
         return polygonPerimeter(getAreaSegments(area));
     }
 
