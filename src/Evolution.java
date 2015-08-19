@@ -14,7 +14,7 @@ public class Evolution {
 
     int DEPTH = 3; //iterations
     float MAX_ATTEMPTS = 200f;
-    int NUM_TRANS = 4;
+    int NUM_TRANS = 3;
 
     int generations = 0;
     boolean resetShape = true;
