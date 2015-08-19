@@ -23,6 +23,19 @@ public class MyTransformUtils {
         return src;
     }
 
+    static AffineTransform composePartial(AffineTransform src, AffineTransform opp, float d){
+        //src.translate(opp.getTranslateX(), opp.getTranslateY());
+        //src.scale(opp.getScaleX(), opp.getScaleY());
+        //src.shear(opp.getShearX(), opp.getShearY());
+        AffineTransform end = (AffineTransform)src.clone();
+        end.concatenate(opp);
+
+        AffineTransform srcOrig = (AffineTransform)src.clone();
+
+        return new AffineTransform(srcOrig.getScaleX() + (end.getScaleX() - srcOrig.getScaleX()) * d,srcOrig.getShearY() + (end.getShearY() - srcOrig.getShearY()) * d,srcOrig.getShearX() + (end.getShearX() - srcOrig.getShearX()) * d,srcOrig.getScaleY() + (end.getScaleY() - srcOrig.getScaleY()) * d,
+                srcOrig.getTranslateX() + (end.getTranslateX()-srcOrig.getTranslateX())*d,srcOrig.getTranslateY() + (end.getTranslateY() -srcOrig.getTranslateY()) *d);
+    }
+
     static Random rnd = new Random();
 
     static AffineTransform getRandomSmall(float size) {

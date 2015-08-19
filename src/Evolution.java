@@ -12,9 +12,11 @@ import java.util.Random;
  */
 public class Evolution {
 
-    int DEPTH = 3; //iterations
-    float MAX_ATTEMPTS = 200f;
-    int NUM_TRANS = 3;
+    final int DEPTH = 3; //iterations
+    final float MAX_ATTEMPTS = 20f;
+    final int NUM_TRANS = 2;
+    final int N_GON = 17;
+    final float NUM_STEPS = 10f;
 
     int generations = 0;
     boolean resetShape = true;
@@ -62,7 +64,17 @@ public class Evolution {
 
         if(depth > 0 )
             for(AffineTransform tran : _trans){
-                result.add(buildTree(depth - 1, MyTransformUtils.compose((AffineTransform)atAccum.clone(), tran),_theShape, _trans));
+
+                AffineTransform end = MyTransformUtils.compose((AffineTransform) atAccum.clone(), tran);
+
+                float subStep = 1.0f/NUM_STEPS;
+
+                for(float d=0; d<1.0; d+=subStep){
+                    AffineTransform half = MyTransformUtils.composePartial((AffineTransform) atAccum.clone(), tran, d);
+                    result.add(buildTree(0, half,_theShape, _trans));
+                }
+
+                result.add(buildTree(depth - 1, end,_theShape, _trans));
             }
 
         return result;
@@ -85,7 +97,7 @@ public class Evolution {
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(37);
+        theShape = MyPolygonUtils.NGon(N_GON);
 
         int numberOfTransforms = NUM_TRANS; // = number of control points/ affines tranforms to choose from
 
@@ -97,7 +109,7 @@ public class Evolution {
             recordTrans = new ArrayList<AffineTransform>();
             trans = new ArrayList<AffineTransform>();
             scoreList = new ArrayList<TransDescriptor>();
-            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandomSmall(startScale)); //use getRandom for more random pts
+            for(int i=0; i<numberOfTransforms; i++)trans.add(MyTransformUtils.getRandom()); //use getRandom for more random pts
             double score = getScore(trans);
             desc = new TransDescriptor(trans,score, this);
         }else{
@@ -107,6 +119,8 @@ public class Evolution {
                 desc = desc.children.get(0);
             }else{
                 desc = desc.randomAncestor();
+                //Collections.sort(globalScoreList);
+                //desc = globalScoreList.get(Math.min((int)(Math.random()*10), globalScoreList.size()));
                // System.out.println("UP");
             }
         }
