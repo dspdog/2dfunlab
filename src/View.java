@@ -43,7 +43,7 @@ public class View extends Panel
 
     double zoom = 1.0;
 
-    static int NUMEVOLVERS = 1;
+    static int NUMEVOLVERS = 3;
 
     public ArrayList<Evolution> myEvolutions = new ArrayList<>();
     public static ArrayList<EvolutionThread> myEvolutionThreads = new ArrayList<>();
@@ -291,31 +291,30 @@ public class View extends Panel
                 rg.setColor(Color.black);
 
                 TransDescriptor transToShow = selectedTrans.myNParent(selectedTrans.generationsBeforeMe()*mousey/512);
-                Area areaToDraw = transToShow.getArea(theRect);
+                Area areaToDraw = transToShow.getArea(new Rectangle(1,1,1,1)); //transToShow.getArea(theRect);
 
                 rg.fill(areaToDraw);
 
-                /*rg.setColor(Color.gray); //triangles
+                rg.setColor(Color.gray); //triangles
 
-                for(Shape s : transToShow.organizedTriangles.internal){
-                    if(s.intersects(theRect)){
+//                for(Shape s : transToShow.organizedTriangles.internal){
+                    /*if(s.intersects(theRect)){
                         rg.setColor(Color.lightGray);
                         rg.fill(s);
                         TriangleProcessor.Triangle theTri = transToShow.organizedTriangles.tp.shape2Tri.get(s);
-                        theTri.putPressure(1.0f, theTri, theTri);
+                        //theTri.putPressure(1.0f, theTri, theTri);
 
-                        //rg.setColor(Color.orange);
-                        //for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){
-                        //    if(n.isInternal)
-                        //    rg.fill(n.myShape);
-                        //}
+                        rg.setColor(Color.orange);
+                        for(TriangleProcessor.Triangle n : transToShow.organizedTriangles.tp.shape2Tri.get(s).myFaceNeighbors){
+                            if(n.isInternal)
+                            rg.fill(n.myShape);
+                        }
 
-                    }else{
-                        rg.setColor(Color.gray);
-                        rg.draw(s);
-                    }
-
-                }*/
+                    }else{*/
+                      //  rg.setColor(Color.gray);
+                      //  rg.draw(s);
+                    //}
+  //              }
             }
 
             rg.setColor(Color.red);

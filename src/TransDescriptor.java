@@ -43,8 +43,8 @@ public class TransDescriptor implements Comparable<TransDescriptor>{
             double scaleDown = (float)Math.sqrt(Evolution.targetArea / startArea);
             myArea.transform(AffineTransform.getScaleInstance(scaleDown, scaleDown));
 
-            myTriangles = MyGeoUtils.triangulate(myArea, 4f, extra);
-            organizedTriangles = new MyAreaUtils.TriangleOrganizer(myArea, myTriangles);
+            //myTriangles = MyGeoUtils.triangulate(myArea, 4f, extra);
+            //organizedTriangles = new MyAreaUtils.TriangleOrganizer(myArea, myTriangles);
         //}
 
         return myArea;

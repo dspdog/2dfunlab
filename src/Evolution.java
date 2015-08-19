@@ -14,7 +14,7 @@ public class Evolution {
 
     int DEPTH = 3; //iterations
     float MAX_ATTEMPTS = 200f;
-    int NUM_TRANS = 2;
+    int NUM_TRANS = 4;
 
     int generations = 0;
     boolean resetShape = true;
@@ -85,7 +85,7 @@ public class Evolution {
         MyTransformUtils.setTime();
         theArea = new Area();
         theSubArea = new Area();
-        theShape = MyPolygonUtils.NGon(17);
+        theShape = MyPolygonUtils.NGon(37);
 
         int numberOfTransforms = NUM_TRANS; // = number of control points/ affines tranforms to choose from
 
@@ -179,32 +179,30 @@ public class Evolution {
         }
     }
 
-    static void testDerivTransforms(float scale, TransDescriptor parentTransform){
-        for(int i=0; i<parentTransform.trans.size(); i++){
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, scale, 0f, 0f,0f,0f,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, scale, 0f,0f,0f,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, scale,0f,0f,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,scale,0f,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,0f,scale,0f, i));
-            parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans, 0f, 0f, 0f,0f,0f,scale, i));
+    static float scaleByBit(int src, int bit, float scale){
+        return ((src << bit) & 1) == 0 ? 0.0f : scale * (float)Math.random();
+    }
 
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale, 0f,0f,0f,0f,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, scale,0f,0f,0f,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, scale, 0f,0f,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, scale,0f,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, 0f,scale,0f));
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, 0f, 0f, 0f, 0f,0f,scale));
-            float rnd = (float)Math.random();
-            float rnd2 = (float)Math.random();
-            float rnd3 = (float)Math.random();
-            float rnd4 = (float)Math.random();
-            parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd), scale * rnd2, scale * (1 - rnd2), scale * rnd3, scale * rnd4));
+    static void testDerivTransforms(float scale, TransDescriptor parentTransform){
+
+       // Random rnd = (new Random()).nextGaussian();
+
+        for(int i=0; i<parentTransform.trans.size(); i++){
+
+            for(int j=0; j<64*4; j++){ //2^6 -- permutations of transforms w/ this scale -- 4 attempts
+                parentTransform.submitChild(MyTransformUtils.getNudgedList(parentTransform.trans,       scaleByBit(j,0,scale), scaleByBit(j,1,scale), scaleByBit(j,2,scale), scaleByBit(j,3,scale), scaleByBit(j,4,scale), scaleByBit(j,5,scale), i));
+                parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scaleByBit(j,0,scale), scaleByBit(j,1,scale), scaleByBit(j,2,scale), scaleByBit(j,3,scale), scaleByBit(j,4,scale), scaleByBit(j,5,scale)));
+            }
+
+            //float rnd = (float)Math.random();
+            //float rnd2 = (float)Math.random();
+            //float rnd3 = (float)Math.random();
+            //float rnd4 = (float)Math.random();
+            //parentTransform.submitChild(MyTransformUtils.getRandomNudgedList(parentTransform.trans, scale * rnd, scale * (1 - rnd), scale * rnd2, scale * (1 - rnd2), scale * rnd3, scale * rnd4));
         }
     }
 
     double getScore(ArrayList<AffineTransform> _trans){//TODO return area along with score! -- change double --> TransDescriptor
-
-        //TODO place "limits" on transform strength
 
         theArea = this.buildTree(DEPTH, new AffineTransform(), theShape, _trans);
 
@@ -223,11 +221,10 @@ public class Evolution {
         containerArea.intersect(theArea);
 
         if(theArea.getBounds().getWidth()>512 || theArea.getBounds().getHeight()>512
-                || !theArea.equals(containerArea)
-                || !theArea.isSingular())score = 0;
+                || !theArea.equals(containerArea) )//                || !theArea.isSingular())
+            score = 0;
 
         View.theAreaDrawn = theArea;
-        //TODO reduce score according to variance^2
 
         return score;
     }

@@ -33,8 +33,8 @@ public class MyTransformUtils {
         float shearX = (float)(rnd.nextGaussian())*size;
         float shearY = (float)(rnd.nextGaussian())*size;
 
-        float translateX =(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale;
-        float translateY = (float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale;
+        float translateX =(float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale*50f;
+        float translateY = (float)(rnd.nextGaussian())*size*MyPolygonUtils.worldScale*50f;
 
         return new AffineTransform(scaleX,shearY,shearX,scaleY,translateX,translateY);
     }
